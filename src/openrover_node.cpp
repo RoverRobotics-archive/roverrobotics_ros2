@@ -1,15 +1,14 @@
 #include <chrono>
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "serial/serial.h"
 
 using namespace std::chrono_literals;
-
-
 
 class OpenRoverNode : public rclcpp::Node {
 public:
   OpenRoverNode();
-
+  serial::Serial s;
 
 protected:
   void timer_callback();
