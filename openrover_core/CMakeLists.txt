@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(rr_openrover_core)
+project(openrover_core)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -14,12 +14,24 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(serial REQUIRED)
+find_package(openrover_core_msgs REQUIRED)
 
-add_executable(openrover_node src/openrover_node.cpp)
-ament_target_dependencies(openrover_node rclcpp std_msgs serial)
+add_executable(openrover_node
+	src/openrover_node.cpp
+	src/openrover_node.hpp
+)
 
-install(TARGETS openrover_node
-  DESTINATION lib/${PROJECT_NAME})
+ament_target_dependencies(openrover_node
+  rclcpp 
+  std_msgs 
+  serial 
+  openrover_core_msgs
+)
+
+install(TARGETS
+  openrover_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()
 
