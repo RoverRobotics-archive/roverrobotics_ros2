@@ -15,21 +15,27 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(serial REQUIRED)
 find_package(openrover_core_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
-add_executable(openrover_node
-	src/openrover_node.cpp
-	src/openrover_node.hpp
+add_executable(openrover
+  src/openrover_node.cpp
+  src/openrover_node.hpp
+  src/openrover_serial.cpp
+  src/openrover_serial.hpp
+  src/openrover.cpp
+  src/openrover.hpp
 )
 
-ament_target_dependencies(openrover_node
+ament_target_dependencies(openrover
   rclcpp 
   std_msgs 
-  serial 
+  serial
+  geometry_msgs
   openrover_core_msgs
 )
 
 install(TARGETS
-  openrover_node
+  openrover
   DESTINATION lib/${PROJECT_NAME}
 )
 
