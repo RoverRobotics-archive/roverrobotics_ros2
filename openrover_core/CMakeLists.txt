@@ -17,13 +17,15 @@ find_package(serial REQUIRED)
 find_package(openrover_core_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
+include_directories(include/ src/)
+file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
+
+
 add_executable(openrover
-  src/openrover_node.cpp
-  src/openrover_node.hpp
-  src/openrover_serial.cpp
-  src/openrover_serial.hpp
-  src/openrover.cpp
-  src/openrover.hpp
+  src/composition.cpp
+  src/connection.cpp
+  src/rover.cpp
+  ${AllHeaders}
 )
 
 ament_target_dependencies(openrover
@@ -34,10 +36,11 @@ ament_target_dependencies(openrover
   openrover_core_msgs
 )
 
+ament_export_include_directories(include)
+
 install(TARGETS
   openrover
   DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()
-

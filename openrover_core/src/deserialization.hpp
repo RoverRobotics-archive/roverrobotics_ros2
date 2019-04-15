@@ -1,0 +1,3 @@
+namespace openrover
+{
+}  // namespace openrover
