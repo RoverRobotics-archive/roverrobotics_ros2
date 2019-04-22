@@ -18,15 +18,19 @@ find_package(openrover_core_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 include_directories(include/ src/)
-file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
-
+#file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
 add_executable(openrover
   src/composition.cpp
   src/connection.cpp
   src/rover.cpp
-  ${AllHeaders}
+ #  ${AllHeaders}
 )
+
+target_include_directories(openrover
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(openrover
   rclcpp 
@@ -35,8 +39,6 @@ ament_target_dependencies(openrover
   geometry_msgs
   openrover_core_msgs
 )
-
-ament_export_include_directories(include)
 
 install(TARGETS
   openrover

@@ -1,11 +1,12 @@
 #pragma once
 #include "rclcpp/rclcpp.hpp"
-#include "serial/serial.h"
 #include "atomic"
 #include <chrono>
 #include "openrover_core_msgs/msg/raw_data.hpp"
 #include "openrover_core_msgs/msg/raw_motor_command.hpp"
 #include "openrover_core_msgs/msg/raw_command.hpp"
+#include "serial/serial.h"  //< yes, this is a cpp header
+
 using namespace openrover_core_msgs;
 using namespace std::chrono_literals;
 
@@ -19,7 +20,6 @@ const unsigned long BAUDRATE = 57600;
 class Connection : public rclcpp::Node
 {
 public:
-  Connection();
   Connection(std::string port);
   static std::vector<std::string> list_ftdi_ports();
 
@@ -43,18 +43,18 @@ protected:
   void read_callback();
   void keepalive_callback();
   void on_kill_motors();
-  void on_motor_speed_commanded(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg);
+  void on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg);
   rclcpp::TimerBase::SharedPtr keepalive_timer;
   rclcpp::TimerBase::SharedPtr read_timer;
   rclcpp::TimerBase::SharedPtr kill_motors_timer;
 
-  std::unique_ptr<serial::Serial> serial;
+  std::shared_ptr<serial::Serial> serial_;
 };
 
 class OpenRoverError : public std::runtime_error
 {
 public:
-  OpenRoverError(const char* msg) : std::runtime_error(msg){};
-  OpenRoverError(const std::string msg) : std::runtime_error(msg){};
+  OpenRoverError(const char* msg) : std::runtime_error(msg) {}
+  OpenRoverError(const std::string msg) : std::runtime_error(msg) {}
 };
 }  // namespace openrover
