@@ -1,5 +1,6 @@
 #include "rover.hpp"
 #include <algorithm>
+#include <cmath>
 
 using std::placeholders::_1;
 using namespace openrover;
@@ -16,11 +17,11 @@ Rover::Rover() : Node("openrover", "", true)
 /// values out of range will be converted to the nearest value in range
 uint8_t to_motor_speed(double d)
 {
-  if (isnan(d))
+  if (std::isnan(d))
   {
     d = 0.0;
   }
-  d = trunc(d);
+  d = std::trunc(d);
   d = std::min(d, +125.0);
   d = std::max(d, -125.0);
   d += 125;
@@ -39,8 +40,8 @@ void Rover::on_velocity(geometry_msgs::msg::Twist::SharedPtr msg)
   auto turn_rate = msg->angular.z;
   auto diff_motors = turn_rate / ODOM_ANGULAR_COEF_2WD;
 
-  double r_motor = (linear_rate * MOTOR_SPEED_ANGULAR_COEF_2WD) + (turn_rate * MOTOR_SPEED_ANGULAR_COEF_2WD);
-  double l_motor = trunc((linear_rate * MOTOR_SPEED_ANGULAR_COEF_2WD) - (turn_rate * MOTOR_SPEED_ANGULAR_COEF_2WD));
+  double r_motor = (linear_rate * MOTOR_SPEED_LINEAR_COEF_2WD) + (turn_rate * MOTOR_SPEED_ANGULAR_COEF_2WD);
+  double l_motor = (linear_rate * MOTOR_SPEED_LINEAR_COEF_2WD) - (turn_rate * MOTOR_SPEED_ANGULAR_COEF_2WD);
 
   openrover_core_msgs::msg::RawMotorCommand e;
   e.left = to_motor_speed(l_motor);

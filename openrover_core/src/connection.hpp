@@ -1,6 +1,6 @@
 #pragma once
 #include "rclcpp/rclcpp.hpp"
-#include "atomic"
+#include <atomic>
 #include <chrono>
 #include "openrover_core_msgs/msg/raw_data.hpp"
 #include "openrover_core_msgs/msg/raw_motor_command.hpp"

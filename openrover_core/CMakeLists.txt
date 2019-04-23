@@ -40,6 +40,10 @@ ament_target_dependencies(openrover
   openrover_core_msgs
 )
 
+if(UNIX)
+   target_link_libraries(openrover atomic)
+endif()
+
 install(TARGETS
   openrover
   DESTINATION lib/${PROJECT_NAME}
