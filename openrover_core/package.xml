@@ -6,8 +6,9 @@
   <description>
   	Communicates with an OpenRover robot.
   </description>
+  <author email="info@roverrobotics.com">Rover Robotics</author>
   <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
-  <license>Apache License 2.0</license>
+  <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   

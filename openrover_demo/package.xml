@@ -4,8 +4,9 @@
   <name>openrover_demo</name>
   <version>0.0.0</version>
   <description>Example of how to launch an OpenRover node</description>
+  <author email="info@roverrobotics.com">Rover Robotics</author>
   <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
-  <license>Apache License 2.0</license>
+  <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
