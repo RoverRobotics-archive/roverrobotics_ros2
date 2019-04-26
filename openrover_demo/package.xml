@@ -1,22 +1,24 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>openrover_demo</name>
-  <version>0.0.0</version>
-  <description>Example of how to launch an OpenRover node</description>
-  <author email="info@roverrobotics.com">Rover Robotics</author>
-  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
-  <license>BSD-3-Clause</license>
+    <name>openrover_demo</name>
+    <version>0.0.0</version>
+    <description>Example of how to launch an OpenRover node</description>
+    <author email="info@roverrobotics.com">Rover Robotics</author>
+    <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+    <license>BSD-3-Clause</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+    <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>openrover_core</exec_depend>
-  <exec_depend>launch_ros</exec_depend>
-  <exec_depend>keystroke</exec_depend>
+    <exec_depend>openrover_core</exec_depend>
 
+    <!-- demo dependencies -->
+    <exec_depend>keystroke</exec_depend>
+    <exec_depend>launch</exec_depend>
+    <exec_depend>launch_ros</exec_depend>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
 </package>
 

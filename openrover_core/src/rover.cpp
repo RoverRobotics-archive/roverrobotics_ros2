@@ -30,15 +30,11 @@ uint8_t to_motor_speed(double d)
 
 void Rover::on_velocity(geometry_msgs::msg::Twist::SharedPtr msg)
 {
-  const double ODOM_AXLE_TRACK_2WD = 14.375;                                      // distance between wheels
-  const double ODOM_ANGULAR_COEF_2WD = 1.0 / (ODOM_AXLE_TRACK_2WD * 2.54 / 100);  // rad per meter
-
   const int MOTOR_SPEED_LINEAR_COEF_2WD = 293;
   const int MOTOR_SPEED_ANGULAR_COEF_2WD = 56;
 
   auto linear_rate = msg->linear.x;
   auto turn_rate = msg->angular.z;
-  auto diff_motors = turn_rate / ODOM_ANGULAR_COEF_2WD;
 
   double r_motor = (linear_rate * MOTOR_SPEED_LINEAR_COEF_2WD) + (turn_rate * MOTOR_SPEED_ANGULAR_COEF_2WD);
   double l_motor = (linear_rate * MOTOR_SPEED_LINEAR_COEF_2WD) - (turn_rate * MOTOR_SPEED_ANGULAR_COEF_2WD);

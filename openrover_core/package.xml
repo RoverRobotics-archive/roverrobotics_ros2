@@ -1,29 +1,29 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="2">
-  <name>openrover_core</name>
-  <version>0.0.0</version>
-  <description>
-  	Communicates with an OpenRover robot.
-  </description>
-  <author email="info@roverrobotics.com">Rover Robotics</author>
-  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
-  <license>BSD-3-Clause</license>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>openrover_core</name>
+    <version>0.0.0</version>
+    <description>
+        Communicates with an OpenRover robot.
+    </description>
+    <author email="info@roverrobotics.com">Rover Robotics</author>
+    <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+    <license>BSD-3-Clause</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  
-  <build_depend>rclcpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>serial</build_depend>
-  <build_depend>openrover_core_msgs</build_depend>
+    <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>rclcpp</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>serial</exec_depend>
-  <exec_depend>openrover_core_msgs</exec_depend>
+    <build_depend>rclcpp</build_depend>
+    <build_depend>std_msgs</build_depend>
+    <build_depend>serial</build_depend>
+    <build_depend>openrover_core_msgs</build_depend>
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
+    <exec_depend>rclcpp</exec_depend>
+    <exec_depend>std_msgs</exec_depend>
+    <exec_depend>serial</exec_depend>
+    <exec_depend>openrover_core_msgs</exec_depend>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
 </package>
 
