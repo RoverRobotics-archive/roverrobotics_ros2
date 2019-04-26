@@ -38,7 +38,7 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
   }
 
   std::vector<uint8_t> payload;
-  for (auto i = 1; i < packet.size() - 1; i++)
+  for (size_t i = 1; i < packet.size() - 1; i++)
   {
     payload.push_back(packet[i]);
   }
@@ -97,7 +97,14 @@ std::vector<std::string> Connection::list_ftdi_ports()
   auto ps = serial::list_ports();
   for (auto& p : ps)
   {
-    if (p.hardware_id.find("FTDI") < p.hardware_id.size())
+    // TODO: do we need both?
+    // on Ubuntu,
+    // port = /dev/ttyUSB0
+	// description = FTDI FT230X Basic UART DM3U53QW
+	// hardware_id = USB VID:PID=0403:6015 SNR=DM3U53QW
+    std::string FTDI {"FTDI"};
+    if (p.description.find(FTDI) < std::string::npos ||
+        p.hardware_id.find(FTDI) < std::string::npos)
     {
       ports.push_back(p.port);
     }
@@ -165,8 +172,7 @@ void Connection::read_callback()
       }
     }
 
-    auto t = serial_->read(inbuf, READ_PACKET_SIZE - 1);
-
+    serial_->read(inbuf, READ_PACKET_SIZE - 1);
     RCLCPP_DEBUG(this->get_logger(), "Packet: %s.", strhex(inbuf));
 
     auto payload = depacketize(inbuf);
