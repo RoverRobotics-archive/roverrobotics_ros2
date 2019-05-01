@@ -11,16 +11,14 @@ using namespace openrover_core_msgs;
 using namespace std::chrono_literals;
 
 using duration = std::chrono::nanoseconds;
-namespace openrover
-{
+namespace openrover {
 const uint8_t UART_START_PACKET = 253;
 const unsigned long BAUDRATE = 57600;
 
 /// Responsible for managing the serial connection and communicating with the rover.
-class Connection : public rclcpp::Node
-{
+class Connection : public rclcpp::Node {
 public:
-  Connection(std::string port);
+  explicit Connection(std::string port);
   static std::vector<std::string> list_ftdi_ports();
 
 protected:
@@ -38,7 +36,7 @@ protected:
   rclcpp::Publisher<openrover_core_msgs::msg::RawData>::SharedPtr pub_raw_data;
   rclcpp::Subscription<openrover_core_msgs::msg::RawMotorCommand>::SharedPtr sub_motor_efforts;
   rclcpp::Subscription<openrover_core_msgs::msg::RawCommand>::SharedPtr sub_raw_commands;
-  void connect(std::string port);
+
   void on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr);
   void read_callback();
   void keepalive_callback();
@@ -51,10 +49,9 @@ protected:
   std::shared_ptr<serial::Serial> serial_;
 };
 
-class OpenRoverError : public std::runtime_error
-{
+class OpenRoverError : public std::runtime_error {
 public:
-  OpenRoverError(const char* msg) : std::runtime_error(msg) {}
+  OpenRoverError(const char *msg) : std::runtime_error(msg) {}
   OpenRoverError(const std::string msg) : std::runtime_error(msg) {}
 };
 }  // namespace openrover
