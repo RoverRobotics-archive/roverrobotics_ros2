@@ -48,12 +48,12 @@ struct UnknownDataElement : public BaseDataElement
     return stream.str();
   }
 };
-struct LeftMotorEncoderState : KnownDataElement<28, int16_t>
+struct LeftMotorEncoderState : KnownDataElement<14, int16_t>
 {
   using KnownDataElement::KnownDataElement;
   int16_t get_value() const { return as_int16(raw_value); }
 };
-struct RightMotorEncoderState : KnownDataElement<30, int16_t>
+struct RightMotorEncoderState : KnownDataElement<16, int16_t>
 {
   using KnownDataElement::KnownDataElement;
   int16_t get_value() const { return as_int16(raw_value); }
