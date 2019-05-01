@@ -66,15 +66,14 @@ void Connection::connect(std::string port)
   keepalive_timer = this->create_wall_timer(keepalive_period, std::bind(&Cls::keepalive_callback, this));
   read_timer = this->create_wall_timer(uart_poll_period, std::bind(&Cls::read_callback, this));
 
-  // auto writer_group = this->create_callback_group(rclcpp::callback_group::CallbackGroupType::MutuallyExclusive);
   kill_motors_timer = this->create_wall_timer(kill_motors_timeout, std::bind(&Cls::on_kill_motors, this));
 
   pub_raw_data = this->create_publisher<openrover_core_msgs::msg::RawData>("raw_data");
 
-  sub_motor_efforts = this->create_subscription<msg::RawMotorCommand>(
-      "motor_efforts", std::bind(&Cls::on_motor_efforts, this, _1), 1);  //, writer_group);
-  sub_raw_commands = this->create_subscription<msg::RawCommand>(
-      "raw_command", std::bind(&Cls::on_raw_command, this, _1), 16);  // , writer_group);
+  sub_motor_efforts =
+      this->create_subscription<msg::RawMotorCommand>("motor_efforts", std::bind(&Cls::on_motor_efforts, this, _1), 1);
+  sub_raw_commands =
+      this->create_subscription<msg::RawCommand>("raw_command", std::bind(&Cls::on_raw_command, this, _1), 16);
 
   RCLCPP_INFO(this->get_logger(), "Connecting to serial: '%s'", port.c_str());
 

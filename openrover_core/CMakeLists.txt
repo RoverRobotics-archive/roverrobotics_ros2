@@ -16,15 +16,18 @@ find_package(std_msgs REQUIRED)
 find_package(serial REQUIRED)
 find_package(openrover_core_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+
 
 include_directories(include/ src/)
-#file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
+file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
 add_executable(openrover
   src/composition.cpp
   src/connection.cpp
   src/rover.cpp
- #  ${AllHeaders}
+  src/data.cpp
+  ${AllHeaders}
 )
 
 target_include_directories(openrover
@@ -38,6 +41,7 @@ ament_target_dependencies(openrover
   serial
   geometry_msgs
   openrover_core_msgs
+  diagnostic_msgs
 )
 
 install(TARGETS
