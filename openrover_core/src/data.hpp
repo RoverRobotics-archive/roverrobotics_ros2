@@ -66,7 +66,25 @@ struct FlipperMotorEncoderState : KnownDataElement<32, int16_t>
 struct RoverVersion : KnownDataElement<40, uint16_t>
 {
   using KnownDataElement::KnownDataElement;
-  uint16_t get_value() const { return as_uint16(raw_value); }
+  uint16_t get_value() const
+  {
+    auto value = as_uint16(raw_value);
+    return value == 40621 ? 0 : value;
+  }
+  virtual std::string string_value() const override
+  {
+    auto v = get_value();
+    if (v == 0)
+      return "legacy";
+
+    auto major = v / 10000;
+    auto minor = v / 100 % 100;
+    auto patch = v / 1 % 100;
+
+    std::stringstream stream;
+    stream << major << "." << minor << "." << patch;
+    return stream.str();
+  }
 };
 
 }  // namespace data
