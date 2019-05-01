@@ -38,9 +38,11 @@ struct KnownDataElement : public BaseDataElement
 };
 struct UnknownDataElement : public BaseDataElement
 {
-  uint8_t which;
+  uint8_t _which;
   RawValue raw_value;
-  UnknownDataElement(uint8_t which, RawValue raw_value) : which(which), raw_value(raw_value) {}
+  uint8_t which() const { return _which; }
+
+  UnknownDataElement(uint8_t which, RawValue raw_value) : _which(which), raw_value(raw_value) {}
   virtual std::string string_value() const override
   {
     std::stringstream stream;
