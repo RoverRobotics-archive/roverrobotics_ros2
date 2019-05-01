@@ -29,7 +29,7 @@ struct BaseDataElement
 template <unsigned char N, typename T>
 struct KnownDataElement : public BaseDataElement
 {
-  const static uint8_t Which = N;
+  static uint8_t which() { return N; }
   RawValue raw_value;
   virtual T get_value() const = 0;
   virtual std::string string_value() const { return std::to_string(get_value()); }

@@ -14,11 +14,13 @@ using namespace openrover_core_msgs;
 
 using Cls = Rover;
 
+bool is_positive(double x) { return x > 0.0; }
+
 Rover::Rover() : Node("openrover", "", true)
 {
   sub_raw_data = create_subscription<msg::RawData>("raw_data", std::bind(&Cls::on_raw_data, this, _1), 20);
   tmr_diagnostics = create_wall_timer(1000ms, std::bind(&Cls::update_diagnostics, this));
-  tmr_odometry = create_wall_timer(30ms, std::bind(&Cls::update_odometry, this));
+  tmr_odometry = create_wall_timer(100ms, std::bind(&Cls::update_odometry, this));
 
   sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", std::bind(&Cls::on_velocity, this, _1), 1);
   pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", 20);
@@ -26,31 +28,14 @@ Rover::Rover() : Node("openrover", "", true)
   pub_diagnostics = create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", 1);
   pub_obs_vel = create_publisher<geometry_msgs::msg::Twist>("obs_vel");
 
-  // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads)
-  if (!get_parameter<double>("top_speed_linear", top_speed_linear) || !(top_speed_linear > 0))
-  {
-    top_speed_linear = 1.5;
-    RCLCPP_WARN(get_logger(), "Top linear speed not known. setting to %f", top_speed_linear);
-  }
-
-  // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads)
-  if (!get_parameter<double>("top_speed_angular", top_speed_angular) || !(top_speed_angular > 0))
-  {
-    top_speed_angular = 6.2;
-    RCLCPP_WARN(get_logger(), "Top turning speed not known. setting to %f", top_speed_angular);
-  }
-
-  if (!get_parameter<double>("meters_per_encoder_unit", meters_per_encoder_unit) || !(meters_per_encoder_unit > 0))
-  {
-    meters_per_encoder_unit = 0.005;  // todo: calibrate this value
-    RCLCPP_WARN(get_logger(), "Odometry linear scale not known. setting to %f", meters_per_encoder_unit);
-  }
-  if (!get_parameter<double>("radians_per_delta_encoder_unit", radians_per_delta_encoder_unit) ||
-      !(radians_per_delta_encoder_unit > 0))
-  {
-    radians_per_delta_encoder_unit = 0.02;  // todo: calibrate this value
-    RCLCPP_WARN(get_logger(), "Odometry turning scale not known. setting to %f", radians_per_delta_encoder_unit);
-  }
+  // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
+  top_speed_linear = get_parameter_checked<double>("top_speed_linear", &is_positive, 6.40);
+  top_speed_angular = get_parameter_checked<double>("top_speed_angular", &is_positive, 6.45);
+  // this value determined by driving straight and dividing distance by average encoder reading
+  meters_per_encoder_unit = get_parameter_checked<double>("meters_per_encoder_unit", &is_positive, 0.001375);
+  // this value determined by driving in a circle and dividing rotation by difference in encoder readings
+  radians_per_delta_encoder_unit =
+      get_parameter_checked<double>("radians_per_delta_encoder_unit", &is_positive, 0.00522);
 }
 
 /// Takes a number between -1.0 and +1.0 and converts it to the nearest motor speed.
@@ -99,37 +84,50 @@ void Rover::on_velocity(geometry_msgs::msg::Twist::SharedPtr msg)
 void openrover::Rover::update_diagnostics()
 {
   diagnostic_msgs::msg::DiagnosticArray diagnostics;
-  diagnostic_msgs::msg::DiagnosticStatus encoders_status;
-  encoders_status.hardware_id = "openrover/motor encoders";
-
-  if (auto left = get_recent<data::LeftMotorEncoderState>())
+  diagnostics.header.stamp = get_clock()->now();
   {
-    diagnostic_msgs::msg::KeyValue kv;
-    kv.key = "left";
-    kv.value = left->state.string_value();
-    encoders_status.values.push_back(kv);
+    diagnostic_msgs::msg::DiagnosticStatus rover_status;
+    rover_status.hardware_id = "openrover";
+    if (auto v = get_recent<data::RoverVersion>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "firmware revision", kv.value = v->state.string_value();
+      rover_status.values.push_back(kv);
+    }
+    diagnostics.status.push_back(rover_status);
   }
-  if (auto right = get_recent<data::RightMotorEncoderState>())
   {
-    diagnostic_msgs::msg::KeyValue kv;
-    kv.key = "right";
-    kv.value = right->state.string_value();
-    encoders_status.values.push_back(kv);
+    diagnostic_msgs::msg::DiagnosticStatus encoders_status;
+    encoders_status.hardware_id = "openrover/motor encoders";
+    if (auto left = get_recent<data::LeftMotorEncoderState>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "left";
+      kv.value = left->state.string_value();
+      encoders_status.values.push_back(kv);
+    }
+    if (auto right = get_recent<data::RightMotorEncoderState>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "right";
+      kv.value = right->state.string_value();
+      encoders_status.values.push_back(kv);
+    }
+    if (auto flipper = get_recent<data::FlipperMotorEncoderState>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "flipper";
+      kv.value = flipper->state.string_value();
+      encoders_status.values.push_back(kv);
+    }
+    diagnostics.status.push_back(encoders_status);
   }
-  if (auto flipper = get_recent<data::FlipperMotorEncoderState>())
-  {
-    diagnostic_msgs::msg::KeyValue kv;
-    kv.key = "flipper";
-    kv.value = flipper->state.string_value();
-    encoders_status.values.push_back(kv);
-  }
-  diagnostics.status.push_back(encoders_status);
   pub_diagnostics->publish(diagnostics);
 }
 
 void openrover::Rover::update_odometry()
 {
-  for (auto arg : { data::LeftMotorEncoderState::Which, data::RightMotorEncoderState::Which })
+  for (auto arg : { data::LeftMotorEncoderState::which(), data::RightMotorEncoderState::which() })
   {
     openrover_core_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
@@ -137,52 +135,61 @@ void openrover::Rover::update_odometry()
     pub_rover_command->publish(cmd);
   }
 
-  auto left_encoder_recent = get_recent<data::LeftMotorEncoderState>();
-  auto right_encoder_recent = get_recent<data::RightMotorEncoderState>();
+  auto left_new_state = get_recent<data::LeftMotorEncoderState>();
+  auto right_new_state = get_recent<data::RightMotorEncoderState>();
 
-  if (!left_encoder_recent || !right_encoder_recent)
+  if (!left_new_state || !right_new_state)
   {
     RCLCPP_WARN(get_logger(), "No odometry data yet");
     return;
   }
 
-  if (left_encoder_published && right_encoder_published)
+  if (!encoder_left_published_state || !encoder_right_published_state)
   {
-    auto left_encoder_delta_state = left_encoder_recent->state.get_value() - left_encoder_published->state.get_value();
-    // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
-    // a-b, whichever has the lower absolute value. This is exactly what we want.
-    auto left_encoder_deltatime = (left_encoder_recent->time - left_encoder_published->time).seconds();
+    // prime with data
+    RCLCPP_INFO(get_logger(), "Initializing encoders");
 
-    auto right_encoder_delta_state =
-        right_encoder_recent->state.get_value() - right_encoder_published->state.get_value();
-    auto right_encoder_deltatime = (right_encoder_recent->time - right_encoder_published->time).seconds();
+    encoder_left_published_state = std::move(left_new_state);
+    encoder_right_published_state = std::move(right_new_state);
+    return;
+  }
 
-    if (left_encoder_deltatime == 0.0 || right_encoder_deltatime == 0.0)
-    {
-      RCLCPP_WARN(get_logger(), "Could not publish observed velocity due to lack of new data");
-    }
+  auto left_delta_state = left_new_state->state.get_value() - encoder_left_published_state->state.get_value();
+  // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
+  // a-b, whichever has the lower absolute value. This is exactly what we want.
+  auto left_delta_time = (left_new_state->time() - encoder_left_published_state->time()).seconds();
 
+  auto right_delta_state = right_new_state->state.get_value() - encoder_right_published_state->state.get_value();
+  auto right_delta_time = (right_new_state->time() - encoder_right_published_state->time()).seconds();
+
+  if (left_delta_time == 0.0 || right_delta_time == 0.0)
+  {
+    RCLCPP_WARN(get_logger(), "Could not publish observed velocity due to lack of new data");
+    RCLCPP_WARN(get_logger(), "old: %d %f new: %d %f", encoder_left_published_state->state.get_value(),
+                encoder_left_published_state->time().seconds(), left_new_state->state.get_value(),
+                left_new_state->time().seconds());
+    return;
+  }
+  else
+  {
     geometry_msgs::msg::Twist twist;
     twist.linear.x =
-        (left_encoder_delta_state / left_encoder_deltatime + right_encoder_delta_state / right_encoder_deltatime) *
-        meters_per_encoder_unit;
+        (left_delta_state / left_delta_time + right_delta_state / right_delta_time) * meters_per_encoder_unit;
     twist.linear.y = 0;
     twist.linear.z = 0;
     twist.angular.x = 0;
     twist.angular.y = 0;
     twist.angular.z =
-        (left_encoder_delta_state / left_encoder_deltatime - right_encoder_delta_state / right_encoder_deltatime) *
-        meters_per_encoder_unit;
+        (left_delta_state / left_delta_time - right_delta_state / right_delta_time) * meters_per_encoder_unit;
 
     pub_obs_vel->publish(twist);
-  };
 
-  left_encoder_published = left_encoder_recent;
-  right_encoder_published = right_encoder_recent;
+    encoder_left_published_state = std::move(left_new_state);
+    encoder_right_published_state = std::move(right_new_state);
+  }
 }
 
 void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data)
 {
-  Timestamped<std::array<uint8_t, 2>> ts_data = { get_clock()->now(), data->value };
-  most_recent_data.emplace(data->which, ts_data);
+  most_recent_data[data->which] = std::make_unique<Timestamped<data::RawValue>>(get_clock()->now(), data->value);
 }
