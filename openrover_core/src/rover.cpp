@@ -20,7 +20,7 @@ Rover::Rover() : Node("openrover", "", true)
 {
   sub_raw_data = create_subscription<msg::RawData>("raw_data", std::bind(&Cls::on_raw_data, this, _1), 20);
   tmr_diagnostics = create_wall_timer(1000ms, std::bind(&Cls::update_diagnostics, this));
-  tmr_odometry = create_wall_timer(100ms, std::bind(&Cls::update_odometry, this));
+  tmr_odometry = create_wall_timer(100ms, std::bind(&Cls::update_motor_distances, this));
 
   sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", std::bind(&Cls::on_velocity, this, _1), 1);
   pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", 20);
@@ -91,7 +91,8 @@ void openrover::Rover::update_diagnostics()
     if (auto v = get_recent<data::RoverVersion>())
     {
       diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "firmware revision", kv.value = v->state.string_value();
+      kv.key = "firmware revision";
+      kv.value = v->state.to_string();
       rover_status.values.push_back(kv);
     }
     diagnostics.status.push_back(rover_status);
@@ -103,21 +104,14 @@ void openrover::Rover::update_diagnostics()
     {
       diagnostic_msgs::msg::KeyValue kv;
       kv.key = "left";
-      kv.value = left->state.string_value();
+      kv.value = std::to_string(left->state);
       encoders_status.values.push_back(kv);
     }
     if (auto right = get_recent<data::RightMotorEncoderState>())
     {
       diagnostic_msgs::msg::KeyValue kv;
       kv.key = "right";
-      kv.value = right->state.string_value();
-      encoders_status.values.push_back(kv);
-    }
-    if (auto flipper = get_recent<data::FlipperMotorEncoderState>())
-    {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "flipper";
-      kv.value = flipper->state.string_value();
+      kv.value = std::to_string(right->state);
       encoders_status.values.push_back(kv);
     }
     diagnostics.status.push_back(encoders_status);
@@ -125,7 +119,7 @@ void openrover::Rover::update_diagnostics()
   pub_diagnostics->publish(diagnostics);
 }
 
-void openrover::Rover::update_odometry()
+void openrover::Rover::update_motor_distances()
 {
   for (auto arg : { data::LeftMotorEncoderState::which(), data::RightMotorEncoderState::which() })
   {
@@ -154,19 +148,19 @@ void openrover::Rover::update_odometry()
     return;
   }
 
-  auto left_delta_state = left_new_state->state.get_value() - encoder_left_published_state->state.get_value();
+  auto left_delta_state = left_new_state->state - encoder_left_published_state->state;
   // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
   // a-b, whichever has the lower absolute value. This is exactly what we want.
   auto left_delta_time = (left_new_state->time() - encoder_left_published_state->time()).seconds();
 
-  auto right_delta_state = right_new_state->state.get_value() - encoder_right_published_state->state.get_value();
+  auto right_delta_state = right_new_state->state - encoder_right_published_state->state;
   auto right_delta_time = (right_new_state->time() - encoder_right_published_state->time()).seconds();
 
   if (left_delta_time == 0.0 || right_delta_time == 0.0)
   {
     RCLCPP_WARN(get_logger(), "Could not publish observed velocity due to lack of new data");
-    RCLCPP_WARN(get_logger(), "old: %d %f new: %d %f", encoder_left_published_state->state.get_value(),
-                encoder_left_published_state->time().seconds(), left_new_state->state.get_value(),
+    RCLCPP_WARN(get_logger(), "old: %d %f new: %d %f", encoder_left_published_state->state,
+                encoder_left_published_state->time().seconds(), left_new_state->state,
                 left_new_state->time().seconds());
     return;
   }

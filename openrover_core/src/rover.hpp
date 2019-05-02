@@ -63,10 +63,10 @@ protected:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub_diagnostics;
 
   rclcpp::TimerBase::SharedPtr tmr_odometry;
-  void update_odometry();
+  void update_motor_distances();
 
-  std::unique_ptr<Timestamped<data::LeftMotorEncoderState>> encoder_left_published_state;
-  std::unique_ptr<Timestamped<data::RightMotorEncoderState>> encoder_right_published_state;
+  std::unique_ptr<Timestamped<data::LeftMotorEncoderState::Value>> encoder_left_published_state;
+  std::unique_ptr<Timestamped<data::RightMotorEncoderState::Value>> encoder_right_published_state;
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_obs_vel;
 
@@ -78,12 +78,13 @@ protected:
   rclcpp::Publisher<openrover_core_msgs::msg::RawCommand>::SharedPtr pub_rover_command;
 
   template <typename T>
-  std::unique_ptr<Timestamped<T>> get_recent()
+  std::unique_ptr<Timestamped<typename T::Value>> get_recent()
   {
     try
     {
       auto raw = *this->most_recent_data.at(T::which());
-      return std::make_unique<Timestamped<T>>(raw.nanoseconds, T(raw.state));
+      auto value = T::decode(raw.state);
+      return std::make_unique<Timestamped<typename T::Value>>(raw.nanoseconds, value);
     }
     catch (std::out_of_range&)
     {
