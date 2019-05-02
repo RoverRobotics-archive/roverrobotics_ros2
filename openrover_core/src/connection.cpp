@@ -11,7 +11,7 @@ using namespace openrover;
 
 const std::array<uint8_t, 3> MOTOR_EFFORT_HALT = { 125, 125, 125 };
 
-uint8_t checksum(std::vector<uint8_t> payload)
+uint8_t checksum(const std::vector<uint8_t>& payload)
 {
   uint32_t sum = 0;
   for (auto i : payload)
@@ -34,11 +34,11 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
 {
   if (packet[0] != UART_START_PACKET)
   {
-    throw new OpenRoverError("Bad packet: did not start with a start byte");
+    throw OpenRoverError("Bad packet: did not start with a start byte");
   }
 
   std::vector<uint8_t> payload;
-  for (auto i = 1; i < packet.size() - 1; i++)
+  for (size_t i = 1; i < packet.size() - 1; i++)
   {
     payload.push_back(packet[i]);
   }
@@ -47,7 +47,7 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
   auto received_checksum = packet[packet.size() - 1];
   if (expected_checksum != received_checksum)
   {
-    throw new OpenRoverError("Bad packet: incorrect checksum");
+    throw OpenRoverError("Bad packet: incorrect checksum");
   }
 
   return payload;
@@ -58,22 +58,20 @@ using Cls = Connection;
 Connection::Connection(std::string port) : Node("connection", "", true), motor_efforts_u8(MOTOR_EFFORT_HALT)
 {
   RCLCPP_INFO(this->get_logger(), "starting node Connection");
-  connect(port);
-}
-void Connection::connect(std::string port)
-{
-  RCLCPP_INFO(this->get_logger(), "Connecting to port = %s ", port);
+
+  RCLCPP_INFO(this->get_logger(), "Connecting to port = %s ", port.c_str());
   keepalive_timer = this->create_wall_timer(keepalive_period, std::bind(&Cls::keepalive_callback, this));
   read_timer = this->create_wall_timer(uart_poll_period, std::bind(&Cls::read_callback, this));
 
+  // auto writer_group = this->create_callback_group(rclcpp::callback_group::CallbackGroupType::MutuallyExclusive);
   kill_motors_timer = this->create_wall_timer(kill_motors_timeout, std::bind(&Cls::on_kill_motors, this));
 
   pub_raw_data = this->create_publisher<openrover_core_msgs::msg::RawData>("raw_data");
 
-  sub_motor_efforts =
-      this->create_subscription<msg::RawMotorCommand>("motor_efforts", std::bind(&Cls::on_motor_efforts, this, _1), 1);
-  sub_raw_commands =
-      this->create_subscription<msg::RawCommand>("raw_command", std::bind(&Cls::on_raw_command, this, _1), 16);
+  sub_motor_efforts = this->create_subscription<msg::RawMotorCommand>(
+      "motor_efforts", std::bind(&Cls::on_motor_efforts, this, _1), 1);  //, writer_group);
+  sub_raw_commands = this->create_subscription<msg::RawCommand>(
+      "openrover_command", std::bind(&Cls::on_raw_command, this, _1), 16);  // , writer_group);
 
   RCLCPP_INFO(this->get_logger(), "Connecting to serial: '%s'", port.c_str());
 
@@ -96,7 +94,13 @@ std::vector<std::string> Connection::list_ftdi_ports()
   auto ps = serial::list_ports();
   for (auto& p : ps)
   {
-    if (p.hardware_id.find("FTDI") < p.hardware_id.size())
+    // TODO: do we need both?
+    // on Ubuntu,
+    // port = /dev/ttyUSB0
+    // description = FTDI FT230X Basic UART DM3U53QW
+    // hardware_id = USB VID:PID=0403:6015 SNR=DM3U53QW
+    std::string FTDI{ "FTDI" };
+    if (p.description.find(FTDI) < std::string::npos || p.hardware_id.find(FTDI) < std::string::npos)
     {
       ports.push_back(p.port);
     }
@@ -115,7 +119,7 @@ void Connection::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr 
 
 void Connection::keepalive_callback()
 {
-  RCLCPP_INFO(this->get_logger(), "begin keepalive");
+  RCLCPP_DEBUG(this->get_logger(), "begin keepalive");
 
   msg::RawCommand cmd;
   cmd.verb = 10;
@@ -125,10 +129,10 @@ void Connection::keepalive_callback()
   auto packed = packetize(payload);
   this->serial_->write(packed);
 
-  RCLCPP_INFO(this->get_logger(), "end keepalive");
+  RCLCPP_DEBUG(this->get_logger(), "end keepalive");
 }
 
-std::string strhex(std::vector<uint8_t> bin)
+std::string strhex(const std::vector<uint8_t>& bin)
 {
   std::ostringstream ss;
   ss << std::hex << std::setw(2) << std::setfill('0');
@@ -146,7 +150,7 @@ void Connection::read_callback()
   while (true)
   {
     std::vector<uint8_t> inbuf;
-    while (inbuf.size() == 0)
+    while (inbuf.empty())
     {
       if (serial_->available() < READ_PACKET_SIZE)
       {
@@ -164,9 +168,9 @@ void Connection::read_callback()
       }
     }
 
-    auto t = serial_->read(inbuf, READ_PACKET_SIZE - 1);
-
-    RCLCPP_DEBUG(this->get_logger(), "Packet: %s.", strhex(inbuf));
+    serial_->read(inbuf, READ_PACKET_SIZE - 1);
+    std::string hexdata = strhex(inbuf);
+    RCLCPP_DEBUG(this->get_logger(), "Packet: %s.", hexdata.c_str());
 
     auto payload = depacketize(inbuf);
 
@@ -191,21 +195,11 @@ void Connection::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::Sha
   auto efforts = motor_efforts_u8.load();
   std::vector<uint8_t> payload{ efforts[0], efforts[1], efforts[2], 0, 0 };
   auto packed = packetize(payload);
+  RCLCPP_DEBUG(this->get_logger(), "Writing data: 0x%d", strhex(packed).c_str());
 
-  RCLCPP_INFO(this->get_logger(), "about to write");
-  try
+  auto n_written = this->serial_->write(packed);
+  if (n_written < packed.size())
   {
-    auto n_written = this->serial_->write(packed);
-    RCLCPP_INFO(this->get_logger(), "wrote bytes %s", n_written);
+    RCLCPP_WARN(this->get_logger(), "Could not write all data. Only wrote %d/%d bytes", n_written, packed.size());
   }
-  catch (const std::exception& e)
-  {
-    RCLCPP_ERROR(this->get_logger(), "oops");
-    RCLCPP_ERROR(this->get_logger(), "error writing bytes %s", e.what());
-  }
-  catch (...)
-  {
-    RCLCPP_ERROR(this->get_logger(), "unknown error");
-  }
-  packed.clear();
 }

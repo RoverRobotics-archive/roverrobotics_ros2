@@ -40,27 +40,25 @@ int main(int argc, char** argv)
   else
   {
     std::cout << "No port specified. Searching." << std::endl;
-    auto ports = Connection::list_ftdi_ports();
-    if (ports.size() == 0)
-    {
-      std::cout << "No ports found" << std::endl;
-      exit(1);
-    }
-    std::cout << "Found ports:" << std::endl;
-    for (auto p : ports)
-    {
-      std::cout << "\t" << p << std::endl;
-    }
-    port = ports[0];
+        auto ports = Connection::list_ftdi_ports();
+        if (ports.empty()) {
+            std::cout << "No ports found" << std::endl;
+            exit(1);
+        }
+        std::cout << "Found ports:" << std::endl;
+        for (const auto &p : ports) {
+            std::cout << "\t" << p << std::endl;
+        }
+        port = ports[0];
   }
 
-  rclcpp::executors::SingleThreadedExecutor executor;
+    rclcpp::executors::SingleThreadedExecutor executor;
 
-  auto n1 = std::make_shared<Connection>(port);
-  executor.add_node(n1);
+    auto connection_node = std::make_shared<Connection>(port);
+    executor.add_node(connection_node);
 
-  auto n2 = std::make_shared<Rover>();
-  executor.add_node(n2);
-  executor.spin();
-  return 0;
+    auto rover_node = std::make_shared<Rover>();
+    executor.add_node(rover_node);
+    executor.spin();
+    return 0;
 }

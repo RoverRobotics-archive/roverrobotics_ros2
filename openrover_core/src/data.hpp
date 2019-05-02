@@ -21,52 +21,86 @@ static auto as_uint16(RawValue r) { return ((uint16_t)r[0]) << 8 | (uint16_t)r[1
 static auto as_int16(RawValue r) { return ((int16_t)r[0]) << 8 | (int16_t)r[1]; }
 static auto as_bits(RawValue r) { return std::bitset<16>(as_uint16(r)); }
 
-struct BaseDataElement
-{
-  virtual std::string string_value() const = 0;
-};
-
 template <unsigned char N, typename T>
-struct KnownDataElement : public BaseDataElement
+struct KnownDataElement
 {
-  const static uint8_t Which = N;
-  RawValue raw_value;
-  virtual T get_value() const = 0;
-  virtual std::string string_value() const { return std::to_string(get_value()); }
-
-  KnownDataElement(RawValue raw_value) : raw_value(raw_value){};
+  KnownDataElement() = delete;
+  
+  using Value = T;
+  static const uint8_t Which = N;
+  static uint8_t which() { return N; }
+  // not implemented on purpose
+  static Value decode(RawValue r);
+  static std::string string_value(RawValue r) { return std::to_string(decode(r)); }
 };
-struct UnknownDataElement : public BaseDataElement
+
+struct UnknownDataElement
 {
   uint8_t which;
   RawValue raw_value;
+
   UnknownDataElement(uint8_t which, RawValue raw_value) : which(which), raw_value(raw_value) {}
-  virtual std::string string_value() const override
+
+  std::string to_string() const
   {
     std::stringstream stream;
     stream << "0x" << std::setfill('0') << std::setw(4) << std::hex << raw_value[0] << raw_value[1];
     return stream.str();
   }
 };
-struct LeftMotorEncoderState : KnownDataElement<28, int16_t>
+
+struct LeftMotorEncoderState : KnownDataElement<14, int16_t>
 {
-  using KnownDataElement::KnownDataElement;
-  int16_t get_value() const { return as_int16(raw_value); }
+  static int16_t decode(openrover::data::RawValue r) { return as_int16(r); }
 };
-struct RightMotorEncoderState : KnownDataElement<30, int16_t>
+struct RightMotorEncoderState : KnownDataElement<16, int16_t>
 {
-  using KnownDataElement::KnownDataElement;
-  int16_t get_value() const { return as_int16(raw_value); }
+  static int16_t decode(openrover::data::RawValue r) { return as_int16(r); }
 };
-struct FlipperMotorEncoderState : KnownDataElement<32, int16_t>
+
+struct LeftMotorEncoderInterval : KnownDataElement<28, double>
 {
-  using KnownDataElement::KnownDataElement;
-  int16_t get_value() const { return as_int16(raw_value); }
+  // based on a 16 MHz timer with 1:8 prescale
+  // so in units of 62.5 ns * 8 = 500 ns = 5e-7s
+  static Value decode(RawValue r) { return as_uint16(r) * 5.0e-7; }
 };
-struct RoverVersion : KnownDataElement<40, uint16_t>
+struct RightMotorEncoderInterval : KnownDataElement<30, double>
 {
-  using KnownDataElement::KnownDataElement;
-  uint16_t get_value() const { return as_uint16(raw_value); }
+  static Value decode(RawValue r) { return as_uint16(r) * 5.0e-7; }
+};
+struct FlipperMotorEncoderInterval : KnownDataElement<32, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) * 5.0e-7; }
+};
+
+struct RoverVersionValue
+{
+  int major;
+  int minor;
+  int patch;
+  std::string to_string() const
+  {
+    if (major == 0 && minor == 0 && patch == 0)
+    {
+      return "legacy";
+    }
+    else
+    {
+      return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
+    }
+  }
+};
+
+struct RoverVersion : KnownDataElement<40, RoverVersionValue>
+{
+  static Value decode(RawValue r)
+  {
+    auto v = as_uint16(r);
+    if (v == 40621)
+      return { 0, 0, 0 };
+    else
+      return { v / 10000, v / 100 % 100, v / 1 % 100 };
+  }
 };
 
 }  // namespace data

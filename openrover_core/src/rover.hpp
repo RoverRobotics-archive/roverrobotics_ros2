@@ -8,31 +8,7 @@
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
 #include <data.hpp>
-
-struct EncoderSnapshot
-{
-  /// The time this snapshot was taken
-  rclcpp::Time time;
-  /// The signed number of times the tachometer has ticked. This is proportional to the number of wheel rotations,
-  /// with a proportionality constant determined by the number of motor windings and the gear ratio.
-  /// it may also underflow or overflow, so be careful!
-  int16_t state;
-};
-
-template <typename T>
-struct Timestamped
-{
-  using State = T;
-  Timestamped(rclcpp::Time t, T state) : time(t), state(state){};
-  const rclcpp::Time time;
-  const T state;
-};
-
-struct EncodersState
-{
-  Timestamped<int16_t> left_motor_prev;
-  Timestamped<int16_t> right_motor_prev;
-};
+#include "timestamped.hpp"
 
 namespace openrover
 {
@@ -43,9 +19,7 @@ public:
   Rover();
 
 protected:
-  std::unordered_map<decltype(openrover_core_msgs::msg::RawData::which),
-                     Timestamped<decltype(openrover_core_msgs::msg::RawData::value)>>
-      most_recent_data;
+  std::unordered_map<uint8_t, std::unique_ptr<Timestamped<std::array<uint8_t, 2>>>> most_recent_data;
 
   /// Speed (m/s) this rover will attain running its motors at full power forward.
   double top_speed_linear;
@@ -59,17 +33,23 @@ protected:
   double radians_per_delta_encoder_unit;
 
   template <typename T>
-  std::shared_ptr<Timestamped<T>> get_recent()
+  T get_parameter_checked(std::string name, std::function<bool(T)> predicate, T fallback)
   {
-    try
+    T value;
+    bool has_param = get_parameter<T>(name, value);
+    if (!has_param)
     {
-      auto raw = this->most_recent_data.at(T::Which);
-      return std::make_shared<Timestamped<T>>(raw.time, T(raw.state));
+      RCLCPP_WARN(get_logger(), "Parameter %s was not defined. Using %s", name.c_str(),
+                  std::to_string(fallback).c_str());
+      return fallback;
     }
-    catch (std::out_of_range)
+    if (!predicate(value))
     {
-      return nullptr;
+      RCLCPP_WARN(get_logger(), "Parameter %s=%s was not valid. Using %s", name.c_str(), std::to_string(value).c_str(),
+                  std::to_string(fallback).c_str());
+      return fallback;
     }
+    return value;
   }
 
   /// Callback for velocity commands
@@ -83,10 +63,10 @@ protected:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub_diagnostics;
 
   rclcpp::TimerBase::SharedPtr tmr_odometry;
-  void update_odometry();
+  void update_motor_distances();
 
-  std::shared_ptr<Timestamped<data::LeftMotorEncoderState>> left_encoder_published;
-  std::shared_ptr<Timestamped<data::RightMotorEncoderState>> right_encoder_published;
+  std::unique_ptr<Timestamped<data::LeftMotorEncoderState::Value>> encoder_left_published_state;
+  std::unique_ptr<Timestamped<data::RightMotorEncoderState::Value>> encoder_right_published_state;
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_obs_vel;
 
@@ -96,5 +76,20 @@ protected:
   /// Publisher for efforts going to the rover
   rclcpp::Publisher<openrover_core_msgs::msg::RawMotorCommand>::SharedPtr pub_motor_efforts;
   rclcpp::Publisher<openrover_core_msgs::msg::RawCommand>::SharedPtr pub_rover_command;
+
+  template <typename T>
+  std::unique_ptr<Timestamped<typename T::Value>> get_recent()
+  {
+    try
+    {
+      auto raw = *this->most_recent_data.at(T::which());
+      auto value = T::decode(raw.state);
+      return std::make_unique<Timestamped<typename T::Value>>(raw.nanoseconds, value);
+    }
+    catch (std::out_of_range&)
+    {
+      return nullptr;
+    }
+  }
 };
 }  // namespace openrover
