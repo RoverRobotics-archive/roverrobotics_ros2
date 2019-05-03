@@ -66,10 +66,9 @@ protected:
   rclcpp::TimerBase::SharedPtr tmr_diagnostics;
   void update_diagnostics();
 
-  rclcpp::Time odom_last_updated;
-  geometry_msgs::msg::Point estimated_location;
-  data::LeftMotorEncoderState::Value encoder_last_position_left;
-  data::RightMotorEncoderState::Value encoder_last_position_right;
+  rclcpp::Time odom_last_time;
+  data::LeftMotorEncoderState::Value odom_last_encoder_position_left;
+  data::RightMotorEncoderState::Value odom_last_encoder_position_right;
   std::shared_ptr<std::vector<diagnostic_msgs::msg::KeyValue>> pending_diagnostics;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub_diagnostics;
 

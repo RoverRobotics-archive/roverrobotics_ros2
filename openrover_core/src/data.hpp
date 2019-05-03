@@ -57,19 +57,22 @@ struct RightMotorEncoderState : KnownDataElement<16, int16_t>
   static int16_t decode(openrover::data::RawValue r) { return as_int16(r); }
 };
 
-struct LeftMotorEncoderInterval : KnownDataElement<28, double>
+// based on a 16 MHz timer with 1:8 prescale
+// todo:
+// so in units of 62.5 ns * 8 = 500 ns = 5e-7s
+// or is it 1:256 prescale = 1.6e-5
+constexpr auto ENCODER_TIME_BASE = 1.6e-5;
+struct LeftMotorEncoderPeriod : KnownDataElement<28, double>
 {
-  // based on a 16 MHz timer with 1:8 prescale
-  // so in units of 62.5 ns * 8 = 500 ns = 5e-7s
-  static Value decode(RawValue r) { return as_uint16(r) * 5.0e-7; }
+  static Value decode(RawValue r) { return as_uint16(r) * ENCODER_TIME_BASE; }
 };
-struct RightMotorEncoderInterval : KnownDataElement<30, double>
+struct RightMotorEncoderPeriod : KnownDataElement<30, double>
 {
-  static Value decode(RawValue r) { return as_uint16(r) * 5.0e-7; }
+  static Value decode(RawValue r) { return as_uint16(r) * ENCODER_TIME_BASE; }
 };
-struct FlipperMotorEncoderInterval : KnownDataElement<32, double>
+struct FlipperMotorEncoderPeriod : KnownDataElement<32, double>
 {
-  static Value decode(RawValue r) { return as_uint16(r) * 5.0e-7; }
+  static Value decode(RawValue r) { return as_uint16(r) * ENCODER_TIME_BASE; }
 };
 
 struct RoverVersionValue

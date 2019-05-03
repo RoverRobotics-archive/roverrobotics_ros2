@@ -120,9 +120,6 @@ void openrover::Rover::update_diagnostics()
       kv.value = std::to_string(data->state);
       encoders_status.values.push_back(kv);
     }
-    if (auto data = get_recent<data::LeftMotorEncoderInterval>())
-    {
-    }
     diagnostics.status.push_back(encoders_status);
   }
   pub_diagnostics->publish(diagnostics);
@@ -131,40 +128,47 @@ void openrover::Rover::update_diagnostics()
 void openrover::Rover::update_odom()
 {
   for (auto arg : { data::LeftMotorEncoderState::Which, data::RightMotorEncoderState::Which,
-                    data::LeftMotorEncoderInterval::Which, data::RightMotorEncoderInterval::Which })
+                    data::LeftMotorEncoderPeriod::Which, data::RightMotorEncoderPeriod::Which })
   {
     openrover_core_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
     cmd.arg = arg;
     pub_rover_command->publish(cmd);
   }
-  if (odom_last_updated.get_clock_type() != RCL_ROS_TIME)
+
+  auto now = get_clock()->now();
+  auto left_encoder_position = get_recent<data::LeftMotorEncoderState>();
+  auto right_encoder_position = get_recent<data::RightMotorEncoderState>();
+  auto left_period = get_recent<data::LeftMotorEncoderPeriod>();
+  auto right_period = get_recent<data::RightMotorEncoderPeriod>();
+
+  if (!left_encoder_position || !right_encoder_position || !left_period || !right_period)
   {
-    odom_last_updated = get_clock()->now();
+    RCLCPP_INFO(get_logger(), "Odometry not ready yet");
+    return;
+  }
+
+  if (odom_last_time.get_clock_type() != RCL_ROS_TIME)
+  {
+    RCLCPP_INFO(get_logger(), "Initializing odometry");
+    odom_last_encoder_position_left = left_encoder_position->state;
+    odom_last_encoder_position_right = right_encoder_position->state;
+    odom_last_time = now;
+
+    // we have no idea where we are, so this is a reasonable starting value
     odom_last_pos_x = 0;
     odom_last_pos_y = 0;
     odom_last_yaw = 0;
     return;
   }
-  auto now = get_clock()->now();
-  auto dt = (now - odom_last_updated).seconds();
 
-  auto left_encoder_position = get_recent<data::LeftMotorEncoderState>();
-  auto right_encoder_position = get_recent<data::RightMotorEncoderState>();
-  auto left_period = get_recent<data::LeftMotorEncoderInterval>();
-  auto right_period = get_recent<data::RightMotorEncoderInterval>();
-
-  if (!left_encoder_position || !right_encoder_position || !left_period || !right_period)
+  if (left_encoder_position->time < odom_last_time || right_encoder_position->time < odom_last_time ||
+      left_period->time < odom_last_time || right_period->time < odom_last_time)
   {
-    RCLCPP_WARN(get_logger(), "Odometry not ready yet");
+    RCLCPP_ERROR(get_logger(), "Trying to compute odometry based on stale data");
     return;
   }
 
-  if (left_encoder_position->time < odom_last_updated || right_encoder_position->time < odom_last_updated ||
-      left_period->time < odom_last_updated || right_period->time < odom_last_updated)
-  {
-    RCLCPP_WARN(get_logger(), "Odometry based on stale data");
-  }
   double left_encoder_frequency = left_period->state == 0 ? 0 : 1.0 / left_period->state;
   left_encoder_frequency *= left_wheel_fwd ? +1 : -1;
   // ^ the encoder doesn't actually have the wheel direction. So we fake it by assuming the same direction as the last
@@ -178,55 +182,64 @@ void openrover::Rover::update_odom()
   // frequency
   if (left_encoder_position->state == 0 && right_encoder_position->state == 0)
   {
+    auto dt = (now - odom_last_time).seconds();
+
     left_encoder_displacement = left_encoder_frequency * dt;
     right_encoder_displacement = right_encoder_frequency * dt;
   }
   else
   {
-    left_encoder_displacement = left_encoder_position->state - encoder_last_position_left;
+    left_encoder_displacement = (left_encoder_position->state - odom_last_encoder_position_left);
     // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
     // a-b, whichever has the lower absolute value. This is exactly what we want.
-    right_encoder_displacement = right_encoder_position->state - encoder_last_position_right;
+    right_encoder_displacement = (right_encoder_position->state - odom_last_encoder_position_right);
   }
 
-  auto angle = odom_last_yaw;
   auto displacement_linear = (left_encoder_displacement + right_encoder_displacement) * meters_per_encoder_sum;
-  auto displacement_angular = (left_encoder_displacement - right_encoder_displacement) * radians_per_encoder_difference;
+  auto displacement_angular =
+      -(left_encoder_displacement - right_encoder_displacement) * radians_per_encoder_difference;
 
   // forward velocity relative to the robot's current frame of reference
   auto velocity_forward = (left_encoder_frequency + right_encoder_frequency) * meters_per_encoder_sum;
   // rotational velocity relative to the robot's current frame of reference
-  auto velocity_clockwise = (left_encoder_frequency - right_encoder_frequency) * radians_per_encoder_difference;
+  auto velocity_yaw = -(left_encoder_frequency - right_encoder_frequency) * radians_per_encoder_difference;
 
-  odom_last_updated = get_clock()->now();
-  odom_last_pos_x += cos(angle + displacement_angular / 2) * displacement_linear;
-  odom_last_pos_y += sin(angle + displacement_angular / 2) * displacement_linear;
-  odom_last_yaw += displacement_angular;
+  auto new_x = odom_last_pos_x + cos(odom_last_yaw + displacement_angular / 2) * displacement_linear;
+  auto new_y = odom_last_pos_y + sin(odom_last_yaw + displacement_angular / 2) * displacement_linear;
+  auto new_yaw = fmod(odom_last_yaw + displacement_angular, 2 * M_PI);
 
   {
+    // velocity in rover's own coordinate frame
     Twist obs_vel;
     obs_vel.linear.x = velocity_forward;
-    obs_vel.angular.z = velocity_clockwise;
+    obs_vel.angular.z = velocity_yaw;
     pub_obs_vel->publish(obs_vel);
   }
 
   {
     nav_msgs::msg::Odometry odom;
-    odom.header.stamp = odom_last_updated;
+    odom.header.stamp = odom_last_time;
     odom.header.frame_id = "odom";
     odom.child_frame_id = "base_link";
 
     tf2::Quaternion pose_q;
-    pose_q.setRPY(0, 0, odom_last_yaw);
-    odom.pose.pose.position.x = odom_last_pos_x;
-    odom.pose.pose.position.y = odom_last_pos_y;
+    pose_q.setRPY(0, 0, new_yaw);
+    odom.pose.pose.position.x = new_x;
+    odom.pose.pose.position.y = new_y;
     odom.pose.pose.orientation = toMsg(pose_q);
 
-    odom.twist.twist.linear.x = velocity_forward * cos(odom_last_yaw);
-    odom.twist.twist.linear.y = velocity_forward * sin(odom_last_yaw);
-    odom.twist.twist.angular.z = velocity_clockwise;
+    odom.twist.twist.linear.x = velocity_forward * cos(new_yaw);
+    odom.twist.twist.linear.y = velocity_forward * sin(new_yaw);
+    odom.twist.twist.angular.z = velocity_yaw;
     pub_odom->publish(odom);
   }
+
+  odom_last_encoder_position_left = left_encoder_position->state;
+  odom_last_encoder_position_right = right_encoder_position->state;
+  odom_last_time = now;
+  odom_last_pos_x = new_x;
+  odom_last_pos_y = new_y;
+  odom_last_yaw = new_yaw;
 }
 
 void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data)
