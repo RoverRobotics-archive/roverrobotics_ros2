@@ -94,7 +94,7 @@ protected:
     {
       auto raw = *this->most_recent_data.at(T::which());
       auto value = T::decode(raw.state);
-      return std::make_unique<Timestamped<typename T::Value>>(raw.nanoseconds, value);
+      return std::make_unique<Timestamped<typename T::Value>>(raw.time, value);
     }
     catch (std::out_of_range&)
     {
