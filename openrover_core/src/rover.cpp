@@ -36,10 +36,10 @@ Rover::Rover() : Node("openrover", "", true)
   top_speed_linear = get_parameter_checked<double>("top_speed_linear", &is_positive, 6.40);
   top_speed_angular = get_parameter_checked<double>("top_speed_angular", &is_positive, 6.45);
   // this value determined by driving straight and dividing distance by average encoder reading
-  meters_per_encoder_unit = get_parameter_checked<double>("meters_per_encoder_unit", &is_positive, 0.001375);
+  meters_per_encoder_sum = get_parameter_checked<double>("meters_per_encoder_sum", &is_positive, 0.0006875);
   // this value determined by driving in a circle and dividing rotation by difference in encoder readings
-  radians_per_delta_encoder_unit =
-      get_parameter_checked<double>("radians_per_delta_encoder_unit", &is_positive, 0.00522);
+  radians_per_encoder_difference =
+      get_parameter_checked<double>("radians_per_encoder_difference", &is_positive, 0.00522);
 }
 
 /// Takes a number between -1.0 and +1.0 and converts it to the nearest motor speed.
@@ -185,13 +185,13 @@ void openrover::Rover::update_odom()
   }
 
   auto angle = odom_last_yaw;
-  auto displacement_linear = (left_encoder_displacement + right_encoder_displacement) / 2 * meters_per_encoder_unit;
-  auto displacement_angular = (left_encoder_displacement - right_encoder_displacement) * radians_per_delta_encoder_unit;
+  auto displacement_linear = (left_encoder_displacement + right_encoder_displacement) * meters_per_encoder_sum;
+  auto displacement_angular = (left_encoder_displacement - right_encoder_displacement) * radians_per_encoder_difference;
 
   // forward velocity relative to the robot's current frame of reference
-  auto velocity_forward = (left_encoder_frequency + right_encoder_frequency) / 2 * meters_per_encoder_unit;
+  auto velocity_forward = (left_encoder_frequency + right_encoder_frequency) * meters_per_encoder_sum;
   // rotational velocity relative to the robot's current frame of reference
-  auto velocity_clockwise = (left_encoder_frequency - right_encoder_frequency) * radians_per_delta_encoder_unit;
+  auto velocity_clockwise = (left_encoder_frequency - right_encoder_frequency) * radians_per_encoder_difference;
 
   odom_last_pos_x += cos(angle + displacement_angular / 2) * displacement_linear;
   odom_last_pos_y += sin(angle + displacement_angular / 2) * displacement_linear;

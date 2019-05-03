@@ -26,11 +26,11 @@ protected:
   /// Rotational speed (rad/s) this rover will attain pushing its motors at full efford in opposite directions
   double top_speed_angular;
 
-  /// If both motor encoders have traveled n increments, this is how far the rover has traveled.
-  double meters_per_encoder_unit;
+  /// If both motor encoders have traveled a combined n increments, this times n is how far the rover has traveled.
+  double meters_per_encoder_sum;
   /// If the left motor encoder has traveled n increments more than the right motor encoder,
-  /// this value times n is how far the rover has rotated
-  double radians_per_delta_encoder_unit;
+  /// this times n is how far the rover has rotated
+  double radians_per_encoder_difference;
 
   template <typename T>
   T get_parameter_checked(std::string name, std::function<bool(T)> predicate, T fallback)
