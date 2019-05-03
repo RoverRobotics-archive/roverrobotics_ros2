@@ -186,8 +186,6 @@ void Connection::on_kill_motors() { motor_efforts_u8 = MOTOR_EFFORT_HALT; }
 
 void Connection::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg)
 {
-  RCLCPP_INFO(this->get_logger(), "got efforts");
-
   this->motor_efforts_u8 = { msg->left, msg->right, msg->flipper };
 
   this->kill_motors_timer->reset();
