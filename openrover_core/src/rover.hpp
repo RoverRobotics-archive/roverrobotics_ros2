@@ -19,7 +19,7 @@ public:
   Rover();
 
 protected:
-  std::unordered_map<uint8_t, std::unique_ptr<Timestamped<std::array<uint8_t, 2>>>> most_recent_data;
+  std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>> most_recent_data;
 
   /// Speed (m/s) this rover will attain running its motors at full power forward.
   double top_speed_linear;
