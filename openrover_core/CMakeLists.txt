@@ -49,10 +49,6 @@ ament_target_dependencies(openrover
         tf2_geometry_msgs
         )
 
-if (UNIX)
-    target_link_libraries(openrover atomic) # todo: remove this dependency
-endif ()
-
 install(TARGETS
         openrover
         DESTINATION lib/${PROJECT_NAME}

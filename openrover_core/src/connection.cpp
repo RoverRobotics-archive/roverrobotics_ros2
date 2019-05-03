@@ -55,7 +55,7 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
 
 using Cls = Connection;
 
-Connection::Connection(std::string port) : Node("connection", "", true), motor_efforts_u8(MOTOR_EFFORT_HALT)
+Connection::Connection(std::string port) : Node("connection", "", true), motor_efforts_u8(&MOTOR_EFFORT_HALT)
 {
   RCLCPP_INFO(this->get_logger(), "starting node Connection");
 
@@ -110,7 +110,7 @@ std::vector<std::string> Connection::list_ftdi_ports()
 
 void Connection::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr cmd)
 {
-  auto efforts = motor_efforts_u8.load();
+  auto efforts = *motor_efforts_u8;
   std::vector<uint8_t> payload{ efforts[0], efforts[1], efforts[2], cmd->verb, cmd->arg };
   auto packed = packetize(payload);
   this->serial_->write(packed);
@@ -124,7 +124,7 @@ void Connection::keepalive_callback()
   msg::RawCommand cmd;
   cmd.verb = 10;
   cmd.arg = 40;
-  auto efforts = motor_efforts_u8.load();
+  auto efforts = *motor_efforts_u8;
   std::vector<uint8_t> payload{ efforts[0], efforts[1], efforts[2], cmd.verb, cmd.arg };
   auto packed = packetize(payload);
   this->serial_->write(packed);
@@ -182,15 +182,16 @@ void Connection::read_callback()
   }
 }
 
-void Connection::on_kill_motors() { motor_efforts_u8 = MOTOR_EFFORT_HALT; }
+void Connection::on_kill_motors() { motor_efforts_u8.reset(&MOTOR_EFFORT_HALT); }
 
 void Connection::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg)
 {
-  this->motor_efforts_u8 = { msg->left, msg->right, msg->flipper };
-
+  auto new_efforts = std::array<uint8_t, 3>{ msg->left, msg->right, msg->flipper };
+  motor_efforts_u8 = std::make_shared<const std::array<uint8_t, 3>>(new_efforts);
+  
   this->kill_motors_timer->reset();
 
-  auto efforts = motor_efforts_u8.load();
+  auto efforts = *motor_efforts_u8;
   std::vector<uint8_t> payload{ efforts[0], efforts[1], efforts[2], 0, 0 };
   auto packed = packetize(payload);
   RCLCPP_DEBUG(this->get_logger(), "Writing data: 0x%d", strhex(packed).c_str());
