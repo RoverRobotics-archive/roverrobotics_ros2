@@ -25,13 +25,12 @@ template <unsigned char N, typename T>
 struct KnownDataElement
 {
   KnownDataElement() = delete;
-  
+
   using Value = T;
   static const uint8_t Which = N;
   static uint8_t which() { return N; }
   // not implemented on purpose
   static Value decode(RawValue r);
-  static std::string string_value(RawValue r) { return std::to_string(decode(r)); }
 };
 
 struct UnknownDataElement

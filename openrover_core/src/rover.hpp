@@ -8,8 +8,8 @@
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
 #include <data.hpp>
+#include "nav_msgs/msg/odometry.hpp"
 #include "timestamped.hpp"
-
 namespace openrover
 {
 /// This node supervises a Connection node and translates between low-level commands and high-level commands.
@@ -52,23 +52,33 @@ protected:
     return value;
   }
 
+  bool left_wheel_fwd;
+  bool right_wheel_fwd;
+  double odom_last_pos_x;
+  double odom_last_pos_y;
+  double odom_last_yaw;
+
   /// Callback for velocity commands
-  void on_velocity(geometry_msgs::msg::Twist::SharedPtr);
+  void on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg);
   /// Callback for new raw data received
   void on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data);
 
   rclcpp::TimerBase::SharedPtr tmr_diagnostics;
   void update_diagnostics();
+
+  rclcpp::Time odom_last_updated;
+  geometry_msgs::msg::Point estimated_location;
+  data::LeftMotorEncoderState::Value encoder_last_position_left;
+  data::RightMotorEncoderState::Value encoder_last_position_right;
   std::shared_ptr<std::vector<diagnostic_msgs::msg::KeyValue>> pending_diagnostics;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub_diagnostics;
 
   rclcpp::TimerBase::SharedPtr tmr_odometry;
-  void update_motor_distances();
-
-  std::unique_ptr<Timestamped<data::LeftMotorEncoderState::Value>> encoder_left_published_state;
-  std::unique_ptr<Timestamped<data::RightMotorEncoderState::Value>> encoder_right_published_state;
+  void update_odom();
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_obs_vel;
+
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel;
   /// Subscription for raw data coming from the rover
