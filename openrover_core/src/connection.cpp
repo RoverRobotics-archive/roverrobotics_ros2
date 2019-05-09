@@ -55,9 +55,11 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
 
 using Cls = Connection;
 
-Connection::Connection(std::string port) : Node("connection", "", true), motor_efforts_u8(&MOTOR_EFFORT_HALT)
+Connection::Connection(std::string port) : Node("connection", "", true)
 {
   RCLCPP_INFO(this->get_logger(), "starting node Connection");
+
+  motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT);
 
   RCLCPP_INFO(this->get_logger(), "Connecting to port = %s ", port.c_str());
   keepalive_timer = this->create_wall_timer(keepalive_period, std::bind(&Cls::keepalive_callback, this));
@@ -182,13 +184,13 @@ void Connection::read_callback()
   }
 }
 
-void Connection::on_kill_motors() { motor_efforts_u8.reset(&MOTOR_EFFORT_HALT); }
+void Connection::on_kill_motors() { motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT); }
 
 void Connection::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg)
 {
   auto new_efforts = std::array<uint8_t, 3>{ msg->left, msg->right, msg->flipper };
   motor_efforts_u8 = std::make_shared<const std::array<uint8_t, 3>>(new_efforts);
-  
+
   this->kill_motors_timer->reset();
 
   auto efforts = *motor_efforts_u8;

@@ -56,12 +56,12 @@ struct RightMotorEncoderState : KnownDataElement<16, int16_t>
 {
   static int16_t decode(openrover::data::RawValue r) { return as_int16(r); }
 };
+// firmware 1.0 : BE CAREFUL reading the firmware code. It's messy and confusing
+// 1:256 prescale with 16MHz base clock = 256 / (16 MHz) = 16 microseconds
+// / 2 to compensate for only counting every *other* commutation
+constexpr auto ENCODER_TIME_BASE = 256.0 / 16.0e6 / 2;
 
-// based on a 16 MHz timer with 1:8 prescale
-// todo:
-// so in units of 62.5 ns * 8 = 500 ns = 5e-7s
-// or is it 1:256 prescale = 1.6e-5
-constexpr auto ENCODER_TIME_BASE = 1.6e-5;
+// the time it takes for a single commutation event
 struct LeftMotorEncoderPeriod : KnownDataElement<28, double>
 {
   static Value decode(RawValue r) { return as_uint16(r) * ENCODER_TIME_BASE; }

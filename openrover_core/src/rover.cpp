@@ -33,18 +33,18 @@ Rover::Rover() : Node("openrover", "", true)
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom");
 
   // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
-  top_speed_linear = get_parameter_checked<double>("top_speed_linear", &is_positive, 6.40);
-  top_speed_angular = get_parameter_checked<double>("top_speed_angular", &is_positive, 6.45);
+  top_speed_linear = get_parameter_checked<double>("top_speed_linear", &is_positive, 3.05);
+  top_speed_angular = get_parameter_checked<double>("top_speed_angular", &is_positive, 16.2);
   // this value determined by driving straight and dividing distance by average encoder reading
   meters_per_encoder_sum = get_parameter_checked<double>("meters_per_encoder_sum", &is_positive, 0.0006875);
   // this value determined by driving in a circle and dividing rotation by difference in encoder readings
   radians_per_encoder_difference =
-      get_parameter_checked<double>("radians_per_encoder_difference", &is_positive, 0.00522);
+      get_parameter_checked<double>("radians_per_encoder_difference", &is_positive, 0.00371);
 }
 
-/// Takes a number between -1.0 and +1.0 and converts it to the nearest motor speed.
-/// values out of range will be converted to the nearest value in range
-uint8_t to_motor_speed(double d)
+/// Takes a number between -1.0 and +1.0 and converts it to the nearest motor command value.
+/// values out of range will be clamped to the nearest value in range
+uint8_t to_motor_command(double d)
 {
   if (std::isnan(d))
   {
@@ -73,16 +73,18 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
   }
 
   // convert the requested speeds to per-motor speeds of [-1.0,+1.0]
-  double l_motor = (linear_rate / top_speed_linear) + (turn_rate / top_speed_angular / 2.0);
-  left_wheel_fwd = l_motor >= 0;
-  double r_motor = (linear_rate / top_speed_linear) - (turn_rate / top_speed_angular / 2.0);
-  right_wheel_fwd = r_motor >= 0;
+  double l_motor = (linear_rate / top_speed_linear) + (turn_rate / top_speed_angular);
+  double r_motor = (linear_rate / top_speed_linear) - (turn_rate / top_speed_angular);
 
-  // and translate them to the hardware values [0, 250]
+  // save off wheel direction for odometry purposes
+  left_wheel_fwd = (l_motor >= 0);
+  right_wheel_fwd = (r_motor >= 0);
+
+  // and translate speeds to the hardware values [0, 250]
   openrover_core_msgs::msg::RawMotorCommand e;
-  e.left = to_motor_speed(l_motor);
-  e.right = to_motor_speed(r_motor);
-  e.flipper = to_motor_speed(0);  // todo
+  e.left = to_motor_command(l_motor);
+  e.right = to_motor_command(r_motor);
+  e.flipper = to_motor_command(0);  // todo
 
   pub_motor_efforts->publish(e);
 }
@@ -117,6 +119,20 @@ void openrover::Rover::update_diagnostics()
     {
       diagnostic_msgs::msg::KeyValue kv;
       kv.key = "right position";
+      kv.value = std::to_string(data->state);
+      encoders_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::LeftMotorEncoderPeriod>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "left period";
+      kv.value = std::to_string(data->state);
+      encoders_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::RightMotorEncoderPeriod>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "right period";
       kv.value = std::to_string(data->state);
       encoders_status.values.push_back(kv);
     }
@@ -165,17 +181,21 @@ void openrover::Rover::update_odom()
   if (left_encoder_position->time < odom_last_time || right_encoder_position->time < odom_last_time ||
       left_period->time < odom_last_time || right_period->time < odom_last_time)
   {
-    RCLCPP_ERROR(get_logger(), "Trying to compute odometry based on stale data");
-    return;
+    RCLCPP_WARN(get_logger(), "Trying to compute odometry based on stale data");
   }
 
-  double left_encoder_frequency = left_period->state == 0 ? 0 : 1.0 / left_period->state;
-  left_encoder_frequency *= left_wheel_fwd ? +1 : -1;
+  double left_encoder_frequency = (left_period->state == 0) ? 0 : 1.0 / (left_period->state);
+  if (!left_wheel_fwd)
+    left_encoder_frequency = -left_encoder_frequency;
+
   // ^ the encoder doesn't actually have the wheel direction. So we fake it by assuming the same direction as the last
   // commanded direction we gave to the wheel
-  double right_encoder_frequency = right_period->state == 0 ? 0 : 1.0 / right_period->state;
-  right_encoder_frequency *= right_wheel_fwd ? +1 : -1;
 
+  double right_encoder_frequency = (right_period->state) == 0 ? 0 : 1.0 / (right_period->state);
+  if (!right_wheel_fwd)
+    right_encoder_frequency = -right_encoder_frequency;
+
+  // encoder displacement since last time we did odometry.
   double left_encoder_displacement, right_encoder_displacement;
 
   // earlier versions of the firmware don't return the encoder position so we have to do it all based on the encoder
@@ -196,17 +216,12 @@ void openrover::Rover::update_odom()
   }
 
   auto displacement_linear = (left_encoder_displacement + right_encoder_displacement) * meters_per_encoder_sum;
-  auto displacement_angular =
-      -(left_encoder_displacement - right_encoder_displacement) * radians_per_encoder_difference;
+  auto displacement_angular = (left_encoder_displacement - right_encoder_displacement) * radians_per_encoder_difference;
 
   // forward velocity relative to the robot's current frame of reference
   auto velocity_forward = (left_encoder_frequency + right_encoder_frequency) * meters_per_encoder_sum;
   // rotational velocity relative to the robot's current frame of reference
-  auto velocity_yaw = -(left_encoder_frequency - right_encoder_frequency) * radians_per_encoder_difference;
-
-  auto new_x = odom_last_pos_x + cos(odom_last_yaw + displacement_angular / 2) * displacement_linear;
-  auto new_y = odom_last_pos_y + sin(odom_last_yaw + displacement_angular / 2) * displacement_linear;
-  auto new_yaw = fmod(odom_last_yaw + displacement_angular, 2 * M_PI);
+  auto velocity_yaw = (left_encoder_frequency - right_encoder_frequency) * radians_per_encoder_difference;
 
   {
     // velocity in rover's own coordinate frame
@@ -216,9 +231,13 @@ void openrover::Rover::update_odom()
     pub_obs_vel->publish(obs_vel);
   }
 
+  auto new_x = odom_last_pos_x + cos(odom_last_yaw - displacement_angular / 2) * displacement_linear;
+  auto new_y = odom_last_pos_y + sin(odom_last_yaw - displacement_angular / 2) * displacement_linear;
+  auto new_yaw = fmod(odom_last_yaw - displacement_angular, 2 * M_PI);
+
   {
     nav_msgs::msg::Odometry odom;
-    odom.header.stamp = odom_last_time;
+    odom.header.stamp = now;
     odom.header.frame_id = "odom";
     odom.child_frame_id = "base_link";
 
@@ -230,7 +249,7 @@ void openrover::Rover::update_odom()
 
     odom.twist.twist.linear.x = velocity_forward * cos(new_yaw);
     odom.twist.twist.linear.y = velocity_forward * sin(new_yaw);
-    odom.twist.twist.angular.z = velocity_yaw;
+    odom.twist.twist.angular.z = -velocity_yaw;
     pub_odom->publish(odom);
   }
 
