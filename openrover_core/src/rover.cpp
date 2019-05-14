@@ -73,8 +73,8 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
   }
 
   // convert the requested speeds to per-motor speeds of [-1.0,+1.0]
-  double l_motor = (linear_rate / top_speed_linear) + (turn_rate / top_speed_angular);
-  double r_motor = (linear_rate / top_speed_linear) - (turn_rate / top_speed_angular);
+  double l_motor = (linear_rate / top_speed_linear) - (turn_rate / top_speed_angular);
+  double r_motor = (linear_rate / top_speed_linear) + (turn_rate / top_speed_angular);
 
   // save off wheel direction for odometry purposes
   left_wheel_fwd = (l_motor >= 0);
@@ -215,13 +215,13 @@ void openrover::Rover::update_odom()
     right_encoder_displacement = (right_encoder_position->state - odom_last_encoder_position_right);
   }
 
-  auto displacement_linear = (left_encoder_displacement + right_encoder_displacement) * meters_per_encoder_sum;
-  auto displacement_angular = (left_encoder_displacement - right_encoder_displacement) * radians_per_encoder_difference;
+  auto displacement_linear = (right_encoder_displacement + left_encoder_displacement) * meters_per_encoder_sum;
+  auto displacement_angular = (right_encoder_displacement - left_encoder_displacement) * radians_per_encoder_difference;
 
   // forward velocity relative to the robot's current frame of reference
-  auto velocity_forward = (left_encoder_frequency + right_encoder_frequency) * meters_per_encoder_sum;
+  auto velocity_forward = (right_encoder_frequency + left_encoder_frequency) * meters_per_encoder_sum;
   // rotational velocity relative to the robot's current frame of reference
-  auto velocity_yaw = (left_encoder_frequency - right_encoder_frequency) * radians_per_encoder_difference;
+  auto velocity_yaw = (right_encoder_frequency - left_encoder_frequency) * radians_per_encoder_difference;
 
   {
     // velocity in rover's own coordinate frame
@@ -231,9 +231,9 @@ void openrover::Rover::update_odom()
     pub_obs_vel->publish(obs_vel);
   }
 
-  auto new_x = odom_last_pos_x + cos(odom_last_yaw - displacement_angular / 2) * displacement_linear;
-  auto new_y = odom_last_pos_y + sin(odom_last_yaw - displacement_angular / 2) * displacement_linear;
-  auto new_yaw = fmod(odom_last_yaw - displacement_angular, 2 * M_PI);
+  auto new_x = odom_last_pos_x + cos(odom_last_yaw + displacement_angular / 2) * displacement_linear;
+  auto new_y = odom_last_pos_y + sin(odom_last_yaw + displacement_angular / 2) * displacement_linear;
+  auto new_yaw = fmod(odom_last_yaw + displacement_angular, 2 * M_PI);
 
   {
     nav_msgs::msg::Odometry odom;
@@ -249,7 +249,7 @@ void openrover::Rover::update_odom()
 
     odom.twist.twist.linear.x = velocity_forward * cos(new_yaw);
     odom.twist.twist.linear.y = velocity_forward * sin(new_yaw);
-    odom.twist.twist.angular.z = -velocity_yaw;
+    odom.twist.twist.angular.z = velocity_yaw;
     pub_odom->publish(odom);
   }
 
