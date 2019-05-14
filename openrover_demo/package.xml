@@ -13,9 +13,12 @@
     <exec_depend>openrover_core</exec_depend>
 
     <!-- demo dependencies -->
+    <exec_depend>joint_state_publisher</exec_depend>
     <exec_depend>keystroke</exec_depend>
     <exec_depend>launch</exec_depend>
     <exec_depend>launch_ros</exec_depend>
+    <exec_depend>robot_state_publisher</exec_depend>
+    <exec_depend>urdf</exec_depend>
 
     <export>
         <build_type>ament_cmake</build_type>
