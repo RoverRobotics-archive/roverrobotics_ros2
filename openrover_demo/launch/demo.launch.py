@@ -11,6 +11,9 @@ print(sys.path)
 
 
 def generate_launch_description():
+    urdf = os.path.join(get_package_share_directory('openrover_demo'),
+        'urdf', 'rover.urdf')
+
     # todo: when ExecutableComposeNodeProcess is launched, use it.
     nodes = [
         Node(
@@ -22,7 +25,12 @@ def generate_launch_description():
             parameters=[{'publish_period': 0.1, 'linear_scale': 0.1, 'angular_scale': 0.2}]),
         Node(
             package='openrover_core', node_executable='openrover', output='screen',
-            arguments=[])
+            arguments=[]),
+        Node(package='robot_state_publisher', node_executable='robot_state_publisher',
+            output='screen', arguments=[urdf], node_name='openrovoer_joint_state_publisher'),
+        Node(package='joint_state_publisher', node_executable='joint_state_publisher',
+            output='screen', arguments=[urdf], node_name='openrover_joint_state_publisher',
+            parameters=[{'publish_default_positions': True}])
     ]
 
     events = [RegisterEventHandler(
