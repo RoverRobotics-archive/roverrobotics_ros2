@@ -152,7 +152,7 @@ se_node:
     # predicition. Note that if an acceleration measurement for the variable in question is available from one of the
     # inputs, the control term will be ignored.
     # Whether or not we use the control input during predicition. Defaults to false.
-    use_control: true
+    use_control: false
     # Whether the input (assumed to be cmd_vel) is a geometry_msgs/Twist or geometry_msgs/TwistStamped message. Defaults to
     # false.
     stamped_control: false
