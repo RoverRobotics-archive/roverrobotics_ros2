@@ -16,6 +16,5 @@ def generate_launch_description():
             node_name='se_node',
             output='screen',
             parameters=[odom_yaml],
-            arguments=['__log_level:=info'],
         ),
     ])
