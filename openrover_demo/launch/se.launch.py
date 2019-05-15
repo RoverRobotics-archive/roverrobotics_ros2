@@ -13,7 +13,7 @@ def generate_launch_description():
         Node(
             package='robot_localization',
             node_executable='se_node',
-            node_name='robot_localization_node',
+            node_name='se_node',
             output='screen',
             parameters=[odom_yaml],
             arguments=['__log_level:=info'],
