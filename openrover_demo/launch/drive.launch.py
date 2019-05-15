@@ -24,18 +24,21 @@ def generate_launch_description():
              output='screen', arguments=[urdf], node_name='openrover_robot_state_publisher'),
         Node(package='joint_state_publisher', node_executable='joint_state_publisher',
              output='screen', arguments=[urdf], node_name='openrover_joint_state_publisher',
-             parameters=[{'publish_default_positions': True}]),
+             parameters=[{
+                 'publish_default_positions': True,
+                 'rate': 30,
+             }]),
         Node(
             package='openrover_core', node_executable='openrover', output='screen',
             arguments=['port:=/dev/rover']
         ),
-        Node(
-            package='robot_localization',
-            node_executable='se_node',
-            node_name='robot_localization_node',
-            output='screen',
-            parameters=[odom_yaml],
-        ),
+        # Node(
+        #     package='robot_localization',
+        #     node_executable='se_node',
+        #     node_name='se_node',
+        #     output='screen',
+        #     parameters=[odom_yaml],
+        # ),
         Node(package='bno055_driver',
              node_executable='bno055_driver',
              node_name='bno055_driver',
