@@ -4,6 +4,7 @@ bno055_driver:
     frame_id: imu_link
     frequency: 30.0
     self_manage: True
+    # these calibration values need to be determined on a per-device basis.
     calibration/accelerometer_offset: [-7, -34, -47]
     calibration/magnetometer_offset: [275, -193, -104]
     calibration/gyroscope_offset: [-3, -3, -1]

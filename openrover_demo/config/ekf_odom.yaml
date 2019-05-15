@@ -33,10 +33,10 @@ robot_localization_node:
     # Debug settings. Not for the faint of heart. Outputs a ludicrous amount of information to the file specified by
     # debug_out_file. I hope you like matrices! Please note that setting this to true will have strongly deleterious
     # effects on the performance of the node. Defaults to false if unspecified.
-    debug: false
+    debug: true
 
     # Defaults to "robot_localization_debug.txt" if unspecified. Please specify the full path.
-    # debug_out_file: /path/to/debug/file.txt
+    debug_out_file: /home/snuc/ros2_ws/se.log
 
     # Whether to broadcast the transformation over the /tf topic. Defaults to true if unspecified.
     publish_tf: true
