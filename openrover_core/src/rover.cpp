@@ -19,7 +19,7 @@ using Cls = Rover;
 
 bool is_positive(double x) { return x > 0.0; }
 
-Rover::Rover() : Node("openrover", "", true)
+Rover::Rover() : Node("openrover")
 {
   sub_raw_data = create_subscription<msg::RawData>("raw_data", std::bind(&Cls::on_raw_data, this, _1), 20);
   tmr_diagnostics = create_wall_timer(1000ms, std::bind(&Cls::update_diagnostics, this));

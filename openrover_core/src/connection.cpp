@@ -55,7 +55,7 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
 
 using Cls = Connection;
 
-Connection::Connection(std::string port) : Node("connection", "", true)
+Connection::Connection(std::string port) : Node("connection")
 {
   RCLCPP_INFO(this->get_logger(), "starting node Connection");
 
