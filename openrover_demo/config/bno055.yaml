@@ -1,0 +1,11 @@
+bno055_driver:
+  ros__parameters:
+    port: /dev/imu
+    frame_id: imu_link
+    frequency: 30.0
+    self_manage: True
+    calibration/accelerometer_offset: [-7, -34, -47]
+    calibration/magnetometer_offset: [275, -193, -104]
+    calibration/gyroscope_offset: [-3, -3, -1]
+    calibration/accelerometer_radius: 1000
+    calibration/magnetometer_radius: 842
