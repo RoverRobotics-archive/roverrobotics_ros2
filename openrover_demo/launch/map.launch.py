@@ -21,6 +21,7 @@ def generate_launch_description():
             arguments=['-configuration_directory', get_package_share_directory('openrover_demo') + '/config',
                        '-configuration_basename', 'cartographer.lua'
                        ],
+            remappings=[('imu', 'imu/data')],
             parameters=[{}]),
         Node(
             package='cartographer_ros',
