@@ -32,6 +32,9 @@ protected:
   /// this times n is how far the rover has rotated
   double radians_per_encoder_difference;
 
+  std::string odom_frame_id;
+  std::string odom_child_frame_id;
+
   template <typename T>
   T get_parameter_checked(std::string name, std::function<bool(T)> predicate, T fallback)
   {
