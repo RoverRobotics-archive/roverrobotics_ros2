@@ -40,6 +40,9 @@ Rover::Rover() : Node("openrover")
   // this value determined by driving in a circle and dividing rotation by difference in encoder readings
   radians_per_encoder_difference =
       get_parameter_checked<double>("radians_per_encoder_difference", &is_positive, 0.00371);
+
+  get_parameter_or<std::string>("odom_frame_id", odom_frame_id, "odom");
+  get_parameter_or<std::string>("odom_child_frame_id", odom_child_frame_id, "base_footprint");
 }
 
 /// Takes a number between -1.0 and +1.0 and converts it to the nearest motor command value.
@@ -238,18 +241,20 @@ void openrover::Rover::update_odom()
   {
     nav_msgs::msg::Odometry odom;
     odom.header.stamp = now;
-    odom.header.frame_id = "odom";
-    odom.child_frame_id = "base_link";
+    odom.header.frame_id = odom_frame_id;
+    odom.child_frame_id = odom_child_frame_id;
 
+    // In the odom_frame_id
     tf2::Quaternion pose_q;
     pose_q.setRPY(0, 0, new_yaw);
     odom.pose.pose.position.x = new_x;
     odom.pose.pose.position.y = new_y;
     odom.pose.pose.orientation = toMsg(pose_q);
 
-    odom.twist.twist.linear.x = velocity_forward * cos(new_yaw);
-    odom.twist.twist.linear.y = velocity_forward * sin(new_yaw);
+    // In the odom_child_frame_id
+    odom.twist.twist.linear.x = velocity_forward;
     odom.twist.twist.angular.z = velocity_yaw;
+
     pub_odom->publish(odom);
   }
 
