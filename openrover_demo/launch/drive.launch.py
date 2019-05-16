@@ -19,6 +19,7 @@ def generate_launch_description():
     assert odom_yaml.is_file()
     imu_yaml = Path(get_package_share_directory('openrover_demo'), 'config/bno055.yaml')
     assert imu_yaml.is_file()
+    lidar_yaml = Path(get_package_share_directory('openrover_demo'), 'config/lidar.yaml')
     nodes = [
         Node(package='robot_state_publisher', node_executable='robot_state_publisher',
              output='screen', arguments=[urdf], node_name='openrover_robot_state_publisher'),
@@ -49,14 +50,7 @@ def generate_launch_description():
             package='rplidar_ros',
             node_executable='rplidarNode',
             output='screen',
-            parameters=[{
-                'serial_port': '/dev/lidar',
-                'serial_baudrate': 115200,  # A1 / A2
-                # 'serial_baudrate': 256000, # A3
-                'frame_id': 'laser',
-                'inverted': False,
-                'angle_compensate': True,
-            }],
+            parameters=[lidar_yaml],
         ),
     ]
 
