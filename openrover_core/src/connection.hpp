@@ -32,7 +32,7 @@ protected:
   duration kill_motors_timeout = 333ms;
 
   /// How often to poll for a uart message
-  duration uart_poll_period = 1ms;
+  duration uart_poll_period = 25ms;
 
   rclcpp::Publisher<openrover_core_msgs::msg::RawData>::SharedPtr pub_raw_data;
   rclcpp::Subscription<openrover_core_msgs::msg::RawMotorCommand>::SharedPtr sub_motor_efforts;
