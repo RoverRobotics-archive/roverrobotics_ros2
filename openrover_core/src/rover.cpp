@@ -254,7 +254,7 @@ void openrover::Rover::update_odom()
     for (size_t i = 0; i < 6; i++)
     {
       // set these covariances high
-      odom.pose.covariance[i * i] = 1e-4;
+      odom.pose.covariance[i * 6 + i] = 1e-4;
     }
     // In the odom_child_frame_id
     odom.twist.twist.linear.x = velocity_forward;
@@ -262,7 +262,7 @@ void openrover::Rover::update_odom()
     odom.twist.covariance = { 0 };
     for (size_t i = 0; i < 6; i++)
     {
-      odom.twist.covariance[i * i] = 1e-4;
+      odom.twist.covariance[i * 6 + i] = 1e-4;
     }
 
     pub_odom->publish(odom);
