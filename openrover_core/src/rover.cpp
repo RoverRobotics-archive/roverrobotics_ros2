@@ -250,10 +250,20 @@ void openrover::Rover::update_odom()
     odom.pose.pose.position.x = new_x;
     odom.pose.pose.position.y = new_y;
     odom.pose.pose.orientation = toMsg(pose_q);
-
+    odom.pose.covariance = { 0 };
+    for (size_t i = 0; i < 6; i++)
+    {
+      // set these covariances high
+      odom.pose.covariance[i * i] = 1e-4;
+    }
     // In the odom_child_frame_id
     odom.twist.twist.linear.x = velocity_forward;
     odom.twist.twist.angular.z = velocity_yaw;
+    odom.twist.covariance = { 0 };
+    for (size_t i = 0; i < 6; i++)
+    {
+      odom.twist.covariance[i * i] = 1e-4;
+    }
 
     pub_odom->publish(odom);
   }
