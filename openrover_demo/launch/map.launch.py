@@ -17,20 +17,15 @@ def generate_launch_description():
         # Node(package='slam_gmapping', node_executable='slam_gmapping', arguments=['__log_level:=debug']),
         Node(
             package='cartographer_ros', node_executable='cartographer_node', output='screen',
-            node_name='cartographer_node',
             arguments=['-configuration_directory', get_package_share_directory('openrover_demo') + '/config',
                        '-configuration_basename', 'cartographer.lua'
                        ],
             remappings=[('imu', 'imu/data')],
-            parameters=[{}]),
+        ),
         Node(
             package='cartographer_ros',
             node_executable='occupancy_grid_node',
-            node_name="occupancy_grid_node",
             output='screen',
             arguments=['-resolution', '0.05', '-publish_period_sec', '1.0']
         ),
-        # Node(
-        #     package='openrover_core', node_executable='openrover', output='screen',
-        #     arguments=[]),
     ])
