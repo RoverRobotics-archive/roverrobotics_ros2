@@ -28,7 +28,7 @@ def generate_launch_description():
         ),
         Node(
             package='openrover_core', node_executable='openrover', output='screen',
-            arguments=['port:=/dev/rover']
+            parameters=[drive_yaml]
         ),
         Node(package='bno055_driver',
              node_executable='bno055_driver',

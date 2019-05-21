@@ -1,4 +1,5 @@
 #pragma once
+
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "openrover_core_msgs/msg/raw_motor_command.hpp"
@@ -10,6 +11,7 @@
 #include <data.hpp>
 #include "nav_msgs/msg/odometry.hpp"
 #include "timestamped.hpp"
+
 namespace openrover
 {
 /// This node supervises a Connection node and translates between low-level commands and high-level commands.

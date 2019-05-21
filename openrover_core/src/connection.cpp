@@ -55,59 +55,39 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
 
 using Cls = Connection;
 
-Connection::Connection(std::string port) : Node("connection")
+Connection::Connection() : Node("connection", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
   RCLCPP_INFO(this->get_logger(), "starting node Connection");
 
+  std::string serial_port = declare_parameter("serial_port", "/dev/ttyUSB0");
+
   motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT);
 
-  RCLCPP_INFO(this->get_logger(), "Connecting to port = %s ", port.c_str());
   keepalive_timer = this->create_wall_timer(keepalive_period, std::bind(&Cls::keepalive_callback, this));
   read_timer = this->create_wall_timer(uart_poll_period, std::bind(&Cls::read_callback, this));
 
   // auto writer_group = this->create_callback_group(rclcpp::callback_group::CallbackGroupType::MutuallyExclusive);
   kill_motors_timer = this->create_wall_timer(kill_motors_timeout, std::bind(&Cls::on_kill_motors, this));
 
-  pub_raw_data = this->create_publisher<openrover_core_msgs::msg::RawData>("raw_data");
+  pub_raw_data = this->create_publisher<openrover_core_msgs::msg::RawData>("raw_data", rclcpp::QoS(16));
 
-  sub_motor_efforts = this->create_subscription<msg::RawMotorCommand>(
-      "motor_efforts", std::bind(&Cls::on_motor_efforts, this, _1), 1);  //, writer_group);
-  sub_raw_commands = this->create_subscription<msg::RawCommand>(
-      "openrover_command", std::bind(&Cls::on_raw_command, this, _1), 16);  // , writer_group);
+  sub_motor_efforts = this->create_subscription<msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1),
+                                                                      std::bind(&Cls::on_motor_efforts, this, _1));
+  sub_raw_commands = this->create_subscription<msg::RawCommand>("openrover_command", rclcpp::QoS(16),
+                                                                std::bind(&Cls::on_raw_command, this, _1));
 
-  RCLCPP_INFO(this->get_logger(), "Connecting to serial: '%s'", port.c_str());
+  RCLCPP_INFO(this->get_logger(), "Connecting to serial: '%s'", serial_port.c_str());
 
   try
   {
     // create a serial device with immediate timeouts.
-    serial_ = std::make_unique<serial::Serial>(port, BAUDRATE);
+    serial_ = std::make_unique<serial::Serial>(serial_port, BAUDRATE);
   }
   catch (const std::exception& e)
   {
     RCLCPP_FATAL(this->get_logger(), e.what());
     throw;
   }
-}
-
-std::vector<std::string> Connection::list_ftdi_ports()
-{
-  std::vector<std::string> ports;
-
-  auto ps = serial::list_ports();
-  for (auto& p : ps)
-  {
-    // TODO: do we need both?
-    // on Ubuntu,
-    // port = /dev/ttyUSB0
-    // description = FTDI FT230X Basic UART DM3U53QW
-    // hardware_id = USB VID:PID=0403:6015 SNR=DM3U53QW
-    std::string FTDI{ "FTDI" };
-    if (p.description.find(FTDI) < std::string::npos || p.hardware_id.find(FTDI) < std::string::npos)
-    {
-      ports.push_back(p.port);
-    }
-  }
-  return ports;
 }
 
 void Connection::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr cmd)

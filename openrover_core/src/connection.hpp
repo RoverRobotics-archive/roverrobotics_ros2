@@ -19,8 +19,7 @@ const unsigned long BAUDRATE = 57600;
 class Connection : public rclcpp::Node
 {
 public:
-  explicit Connection(std::string port);
-  static std::vector<std::string> list_ftdi_ports();
+  Connection();
 
 protected:
   std::shared_ptr<const std::array<uint8_t, 3>> motor_efforts_u8;

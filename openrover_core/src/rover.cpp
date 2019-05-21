@@ -7,6 +7,7 @@
 #include "data.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "rclcpp/node_options.hpp"
 
 using std::placeholders::_1;
 using namespace openrover;
@@ -19,18 +20,19 @@ using Cls = Rover;
 
 bool is_positive(double x) { return x > 0.0; }
 
-Rover::Rover() : Node("openrover")
+Rover::Rover() : Node("openrover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
-  sub_raw_data = create_subscription<msg::RawData>("raw_data", std::bind(&Cls::on_raw_data, this, _1), 20);
+  sub_raw_data = create_subscription<msg::RawData>("raw_data", rclcpp::QoS(16), std::bind(&Cls::on_raw_data, this, _1));
   tmr_diagnostics = create_wall_timer(1000ms, std::bind(&Cls::update_diagnostics, this));
   tmr_odometry = create_wall_timer(100ms, std::bind(&Cls::update_odom, this));
 
-  sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", std::bind(&Cls::on_cmd_vel, this, _1), 1);
-  pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", 20);
-  pub_motor_efforts = create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", 1);
-  pub_diagnostics = create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", 1);
-  pub_obs_vel = create_publisher<geometry_msgs::msg::Twist>("obs_vel");
-  pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom");
+  sub_cmd_vel =
+      create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1), std::bind(&Cls::on_cmd_vel, this, _1));
+  pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(16));
+  pub_motor_efforts = create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
+  pub_diagnostics = create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", rclcpp::QoS(1));
+  pub_obs_vel = create_publisher<geometry_msgs::msg::Twist>("obs_vel", rclcpp::QoS(2));
+  pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", rclcpp::QoS(4));
 
   // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
   top_speed_linear = get_parameter_checked<double>("top_speed_linear", &is_positive, 3.05);
