@@ -16,10 +16,10 @@ const uint8_t UART_START_PACKET = 253;
 const unsigned long BAUDRATE = 57600;
 
 /// Responsible for managing the serial connection and communicating with the rover.
-class Connection : public rclcpp::Node
+class RoverSerial : public rclcpp::Node
 {
 public:
-  Connection();
+  RoverSerial();
 
 protected:
   std::shared_ptr<const std::array<uint8_t, 3>> motor_efforts_u8;

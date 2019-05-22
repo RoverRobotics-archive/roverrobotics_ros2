@@ -18,13 +18,15 @@ using namespace openrover_core_msgs;
 
 using Cls = Rover;
 
-bool is_positive(double x) { return x > 0.0; }
-
-Rover::Rover() : Node("openrover", rclcpp::NodeOptions().use_intra_process_comms(true))
+Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
+  RCLCPP_INFO(this->get_logger(), "Starting rover driver node");
+
   sub_raw_data = create_subscription<msg::RawData>("raw_data", rclcpp::QoS(16), std::bind(&Cls::on_raw_data, this, _1));
-  tmr_diagnostics = create_wall_timer(1000ms, std::bind(&Cls::update_diagnostics, this));
-  tmr_odometry = create_wall_timer(100ms, std::bind(&Cls::update_odom, this));
+  double diagnostics_frequency = declare_parameter("diagnostics_frequency", 1.0);
+  tmr_diagnostics = create_wall_timer(1s / diagnostics_frequency, std::bind(&Cls::update_diagnostics, this));
+  double odometry_frequency = declare_parameter("odometry_frequency", 10.0);
+  tmr_odometry = create_wall_timer(1s / odometry_frequency, std::bind(&Cls::update_odom, this));
 
   sub_cmd_vel =
       create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1), std::bind(&Cls::on_cmd_vel, this, _1));
@@ -35,16 +37,15 @@ Rover::Rover() : Node("openrover", rclcpp::NodeOptions().use_intra_process_comms
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", rclcpp::QoS(4));
 
   // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
-  top_speed_linear = get_parameter_checked<double>("top_speed_linear", &is_positive, 3.05);
-  top_speed_angular = get_parameter_checked<double>("top_speed_angular", &is_positive, 16.2);
+  top_speed_linear = declare_parameter("top_speed_linear", 3.05);
+  top_speed_angular = declare_parameter("top_speed_angular", 16.2);
   // this value determined by driving straight and dividing distance by average encoder reading
-  meters_per_encoder_sum = get_parameter_checked<double>("meters_per_encoder_sum", &is_positive, 0.0006875);
+  meters_per_encoder_sum = declare_parameter("meters_per_encoder_sum", 0.0006875);
   // this value determined by driving in a circle and dividing rotation by difference in encoder readings
-  radians_per_encoder_difference =
-      get_parameter_checked<double>("radians_per_encoder_difference", &is_positive, 0.00371);
+  radians_per_encoder_difference = declare_parameter("radians_per_encoder_difference", 0.00371);
 
-  get_parameter_or<std::string>("odom_frame_id", odom_frame_id, "odom");
-  get_parameter_or<std::string>("odom_child_frame_id", odom_child_frame_id, "base_footprint");
+  odom_frame_id = declare_parameter("odom_frame_id", "odom");
+  odom_child_frame_id = declare_parameter("odom_child_frame_id", "base_footprint");
 }
 
 /// Takes a number between -1.0 and +1.0 and converts it to the nearest motor command value.

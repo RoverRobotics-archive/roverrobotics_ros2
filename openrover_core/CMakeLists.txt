@@ -26,7 +26,7 @@ file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
 add_executable(openrover
         src/composition.cpp
-        src/connection.cpp
+  src/rover_serial.cpp
         src/rover.cpp
         src/data.cpp
         ${AllHeaders}
@@ -50,7 +50,7 @@ ament_target_dependencies(openrover
         )
 
 install(TARGETS
-        openrover
+  rover
         DESTINATION lib/${PROJECT_NAME}
         )
 

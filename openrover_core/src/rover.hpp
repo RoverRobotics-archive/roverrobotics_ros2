@@ -37,26 +37,6 @@ protected:
   std::string odom_frame_id;
   std::string odom_child_frame_id;
 
-  template <typename T>
-  T get_parameter_checked(std::string name, std::function<bool(T)> predicate, T fallback)
-  {
-    T value;
-    bool has_param = get_parameter<T>(name, value);
-    if (!has_param)
-    {
-      RCLCPP_WARN(get_logger(), "Parameter %s was not defined. Using %s", name.c_str(),
-                  std::to_string(fallback).c_str());
-      return fallback;
-    }
-    if (!predicate(value))
-    {
-      RCLCPP_WARN(get_logger(), "Parameter %s=%s was not valid. Using %s", name.c_str(), std::to_string(value).c_str(),
-                  std::to_string(fallback).c_str());
-      return fallback;
-    }
-    return value;
-  }
-
   bool left_wheel_fwd;
   bool right_wheel_fwd;
   double odom_last_pos_x;

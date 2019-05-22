@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-#include "connection.hpp"
+#include "rover_serial.hpp"
 
 using serial::Serial;
 using std::placeholders::_1;
@@ -53,11 +53,11 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
   return payload;
 }
 
-using Cls = Connection;
+using Cls = RoverSerial;
 
-Connection::Connection() : Node("connection", rclcpp::NodeOptions().use_intra_process_comms(true))
+RoverSerial::RoverSerial() : Node("rover_serial", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
-  RCLCPP_INFO(this->get_logger(), "starting node Connection");
+  RCLCPP_INFO(this->get_logger(), "Starting rover serial communication node");
 
   std::string serial_port = declare_parameter("serial_port", "/dev/ttyUSB0");
 
@@ -90,7 +90,7 @@ Connection::Connection() : Node("connection", rclcpp::NodeOptions().use_intra_pr
   }
 }
 
-void Connection::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr cmd)
+void RoverSerial::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr cmd)
 {
   auto efforts = *motor_efforts_u8;
   std::vector<uint8_t> payload{ efforts[0], efforts[1], efforts[2], cmd->verb, cmd->arg };
@@ -99,7 +99,7 @@ void Connection::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr 
   keepalive_timer->reset();
 }
 
-void Connection::keepalive_callback()
+void RoverSerial::keepalive_callback()
 {
   RCLCPP_DEBUG(this->get_logger(), "begin keepalive");
 
@@ -126,7 +126,7 @@ std::string strhex(const std::vector<uint8_t>& bin)
   return ss.str();
 }
 
-void Connection::read_callback()
+void RoverSerial::read_callback()
 {
   const size_t READ_PACKET_SIZE = 5;
   while (true)
@@ -163,9 +163,9 @@ void Connection::read_callback()
   }
 }
 
-void Connection::on_kill_motors() { motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT); }
+void RoverSerial::on_kill_motors() { motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT); }
 
-void Connection::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg)
+void RoverSerial::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg)
 {
   auto new_efforts = std::array<uint8_t, 3>{ msg->left, msg->right, msg->flipper };
   motor_efforts_u8 = std::make_shared<const std::array<uint8_t, 3>>(new_efforts);

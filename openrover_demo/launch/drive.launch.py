@@ -27,7 +27,7 @@ def generate_launch_description():
             output='screen', arguments=[urdf], parameters=[drive_yaml]
         ),
         Node(
-            package='openrover_core', node_executable='openrover', output='screen',
+            package='openrover_core', node_executable='rover', output='screen',
             parameters=[drive_yaml]
         ),
         Node(package='bno055_driver',
