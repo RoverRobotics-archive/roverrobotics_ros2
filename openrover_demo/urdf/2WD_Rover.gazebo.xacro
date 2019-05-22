@@ -39,7 +39,7 @@
     <material>Gazebo/White</material>
   </gazebo>
 
-  <gazebo reference="caster_back_right_link">
+  <gazebo reference="caster_back_left_link">
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <kp>1000000.0</kp>
@@ -49,7 +49,7 @@
     <material>Gazebo/FlatBlack</material>
   </gazebo>
 
-  <gazebo reference="caster_back_left_link">
+  <gazebo reference="caster_back_right_link">
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <kp>1000000.0</kp>
@@ -73,13 +73,13 @@
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
       <odometrySource>world</odometrySource>
-      <publishOdomTF>true</publishOdomTF>
+      <publishOdomTF>false</publishOdomTF>
       <robotBaseFrame>base_footprint</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
-      <publishTf>true</publishTf>
+      <publishTf>false</publishTf>
       <publishWheelJointState>false</publishWheelJointState>
       <legacyMode>false</legacyMode>
-      <updateRate>15</updateRate>
+      <updateRate>10</updateRate>
       <leftJoint>wheel_left_joint</leftJoint>
       <rightJoint>wheel_right_joint</rightJoint>
       <wheelSeparation>0.287</wheelSeparation>
@@ -92,8 +92,8 @@
 
   <gazebo>
     <plugin name="openrover_caster_publisher" filename="libgazebo_ros_joint_state_publisher.so">
-      <jointName>caster_back_left_joint,caster_back_right_joint,wheel_left_joint,wheel_right_joint</jointName>
-      <updateRate>15</updateRate>
+      <jointName>wheel_left_joint,wheel_right_joint,caster_back_left_joint,caster_back_right_joint</jointName>
+      <updateRate>30</updateRate>
     </plugin>
   </gazebo>
 
@@ -105,7 +105,7 @@
       <topicName>imu/data</topicName>
       <serviceName>imu_service</serviceName>
       <gaussianNoise>0.0</gaussianNoise>
-      <updateRate>20</updateRate>
+      <updateRate>30</updateRate>
       <imu>
         <noise>
           <type>gaussian</type>
@@ -152,7 +152,7 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+      <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_gpu_laser.so">
         <topicName>scan</topicName>
         <frameName>lidar_link</frameName>
       </plugin>
