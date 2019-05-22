@@ -156,11 +156,10 @@ void Connection::read_callback()
 
     auto payload = depacketize(inbuf);
 
-    msg::RawData data;
-    data.which = payload[0];
-    data.value = { payload[1], payload[2] };
-
-    this->pub_raw_data->publish(data);
+    auto data = std::make_unique<msg::RawData>();
+    data->which = payload[0];
+    data->value = { payload[1], payload[2] };
+    this->pub_raw_data->publish(std::move(data));
   }
 }
 

@@ -96,8 +96,8 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
 
 void openrover::Rover::update_diagnostics()
 {
-  diagnostic_msgs::msg::DiagnosticArray diagnostics;
-  diagnostics.header.stamp = get_clock()->now();
+  auto diagnostics = std::make_unique<diagnostic_msgs::msg::DiagnosticArray>();
+  diagnostics->header.stamp = get_clock()->now();
   {
     diagnostic_msgs::msg::DiagnosticStatus rover_status;
     rover_status.hardware_id = "openrover";
@@ -108,7 +108,7 @@ void openrover::Rover::update_diagnostics()
       kv.value = v->state.to_string();
       rover_status.values.push_back(kv);
     }
-    diagnostics.status.push_back(rover_status);
+    diagnostics->status.push_back(rover_status);
   }
   {
     diagnostic_msgs::msg::DiagnosticStatus encoders_status;
@@ -141,9 +141,9 @@ void openrover::Rover::update_diagnostics()
       kv.value = std::to_string(data->state);
       encoders_status.values.push_back(kv);
     }
-    diagnostics.status.push_back(encoders_status);
+    diagnostics->status.push_back(encoders_status);
   }
-  pub_diagnostics->publish(diagnostics);
+  pub_diagnostics->publish(std::move(diagnostics));
 }
 
 void openrover::Rover::update_odom()
@@ -230,10 +230,10 @@ void openrover::Rover::update_odom()
 
   {
     // velocity in rover's own coordinate frame
-    Twist obs_vel;
-    obs_vel.linear.x = velocity_forward;
-    obs_vel.angular.z = velocity_yaw;
-    pub_obs_vel->publish(obs_vel);
+    auto obs_vel = std::make_unique<Twist>();
+    obs_vel->linear.x = velocity_forward;
+    obs_vel->angular.z = velocity_yaw;
+    pub_obs_vel->publish(std::move(obs_vel));
   }
 
   auto new_x = odom_last_pos_x + cos(odom_last_yaw + displacement_angular / 2) * displacement_linear;
@@ -241,33 +241,33 @@ void openrover::Rover::update_odom()
   auto new_yaw = fmod(odom_last_yaw + displacement_angular, 2 * M_PI);
 
   {
-    nav_msgs::msg::Odometry odom;
-    odom.header.stamp = now;
-    odom.header.frame_id = odom_frame_id;
-    odom.child_frame_id = odom_child_frame_id;
+    auto odom = std::make_unique<nav_msgs::msg::Odometry>();
+    odom->header.frame_id = odom_frame_id;
+    odom->child_frame_id = odom_child_frame_id;
+    odom->header.stamp = now;
 
     // In the odom_frame_id
     tf2::Quaternion pose_q;
     pose_q.setRPY(0, 0, new_yaw);
-    odom.pose.pose.position.x = new_x;
-    odom.pose.pose.position.y = new_y;
-    odom.pose.pose.orientation = toMsg(pose_q);
-    odom.pose.covariance = { 0 };
+    odom->pose.pose.position.x = new_x;
+    odom->pose.pose.position.y = new_y;
+    odom->pose.pose.orientation = toMsg(pose_q);
+    odom->pose.covariance = { 0 };
     for (size_t i = 0; i < 6; i++)
     {
       // set these covariances high
-      odom.pose.covariance[i * 6 + i] = 1e-4;
+      odom->pose.covariance[i * 6 + i] = 1e-4;
     }
     // In the odom_child_frame_id
-    odom.twist.twist.linear.x = velocity_forward;
-    odom.twist.twist.angular.z = velocity_yaw;
-    odom.twist.covariance = { 0 };
+    odom->twist.twist.linear.x = velocity_forward;
+    odom->twist.twist.angular.z = velocity_yaw;
+    odom->twist.covariance = { 0 };
     for (size_t i = 0; i < 6; i++)
     {
-      odom.twist.covariance[i * 6 + i] = 1e-4;
+      odom->twist.covariance[i * 6 + i] = 1e-4;
     }
 
-    pub_odom->publish(odom);
+    pub_odom->publish(std::move(odom));
   }
 
   odom_last_encoder_position_left = left_encoder_position->state;
