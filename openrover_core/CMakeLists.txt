@@ -24,7 +24,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 include_directories(include/ src/)
 file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
-add_executable(openrover
+add_executable(rover
         src/composition.cpp
   src/rover_serial.cpp
         src/rover.cpp
@@ -32,12 +32,12 @@ add_executable(openrover
         ${AllHeaders}
         )
 
-target_include_directories(openrover
+target_include_directories(rover
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(openrover
+ament_target_dependencies(rover
         rclcpp
         std_msgs
         serial
