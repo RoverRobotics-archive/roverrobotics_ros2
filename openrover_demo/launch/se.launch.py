@@ -15,5 +15,6 @@ def generate_launch_description():
             node_executable='se_node',
             output='screen',
             parameters=[odom_yaml],
+            remappings=[('odometry/filtered', 'odom')]
         ),
     ])
