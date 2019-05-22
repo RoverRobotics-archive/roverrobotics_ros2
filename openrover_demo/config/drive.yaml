@@ -15,8 +15,13 @@ bno055_driver:
   ros__parameters:
     port: /dev/imu
     frame_id: imu_link
-    frequency: 10.0
+    frequency: 30.0
     self_manage: True
+
+    angular_velocity_stdev: 0.0052
+    linear_acceleration_stdev: 0.0015
+    magnetic_field_stdev: 0.0000005
+    orientation_stdev: 0.000001
     # these calibration values need to be determined on a per-device basis.
     calibration/accelerometer_offset: [-7, -34, -47]
     calibration/magnetometer_offset: [275, -193, -104]

@@ -9,7 +9,7 @@ se_node:
     # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
     # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
     # filter will generate new output. Defaults to 1 / frequency if not specified.
-    sensor_timeout: 0.1
+    #sensor_timeout: 0.1
 
     # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is
     # set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar
@@ -105,7 +105,7 @@ se_node:
     # data is converted to velocity data by differentiating the absolute pose measurements. These velocities are then
     # integrated as usual. NOTE: this only applies to sensors that provide pose measurements; setting differential to true
     # for twist measurements has no effect.
-    odom0_differential: false
+    odom0_differential: true
 
     # [ADVANCED] When the node starts, if this parameter is true, then the first measurement is treated as a "zero point"
     # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
@@ -119,8 +119,8 @@ se_node:
     # required. Data is specified at the level of pose and twist variables, rather than for each variable in isolation.
     # For messages that have both pose and twist data, the parameter specifies to which part of the message we are applying
     # the thresholds.
-    odom0_pose_rejection_threshold: 5.0
-    odom0_twist_rejection_threshold: 1.0
+    #odom0_pose_rejection_threshold: 5.0
+    #odom0_twist_rejection_threshold: 1.0
 
     imu0: imu/data
     imu0_config: [false, false, false,
@@ -130,11 +130,11 @@ se_node:
                   true,  true,  true]
     imu0_nodelay: false
     imu0_differential: false
-    imu0_relative: true
+    imu0_relative: false
     imu0_queue_size: 5
-    imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-    imu0_twist_rejection_threshold: 0.8                #
-    imu0_linear_acceleration_rejection_threshold: 0.8  #
+    #imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
+    #imu0_twist_rejection_threshold: 0.8                #
+    #imu0_linear_acceleration_rejection_threshold: 0.8  #
 
     # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
     # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame.
