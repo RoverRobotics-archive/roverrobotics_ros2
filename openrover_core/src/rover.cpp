@@ -34,7 +34,7 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   pub_motor_efforts = create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
   pub_diagnostics = create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", rclcpp::QoS(1));
   pub_obs_vel = create_publisher<geometry_msgs::msg::Twist>("obs_vel", rclcpp::QoS(2));
-  pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom", rclcpp::QoS(4));
+  pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom_raw", rclcpp::QoS(4));
 
   // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
   top_speed_linear = declare_parameter("top_speed_linear", 3.05);
