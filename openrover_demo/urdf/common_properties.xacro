@@ -10,6 +10,7 @@
   <material name="dark">
     <color rgba="0.3 0.3 0.3 1.0"/>
   </material>
+
   <material name="light_black">
     <color rgba="0.4 0.4 0.4 1.0"/>
   </material>
@@ -41,4 +42,9 @@
   <material name="white">
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
+
+  <material name="acrylic">
+    <color rgba="0.9 0.9 1.0 0.6"/>
+  </material>
+
 </robot>

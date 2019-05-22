@@ -35,6 +35,9 @@
   <material name="white">
     <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
+  <material name="acrylic">
+    <color rgba="0.9 0.9 1.0 0.6"/>
+  </material>
   <gazebo reference="base_link">
     <material>Gazebo/DarkGrey</material>
   </gazebo>
@@ -67,7 +70,7 @@
     <maxVel>1.0</maxVel>
     <material>Gazebo/White</material>
   </gazebo>
-  <gazebo reference="caster_back_right_link">
+  <gazebo reference="caster_back_left_link">
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <kp>1000000.0</kp>
@@ -76,7 +79,7 @@
     <maxVel>1.0</maxVel>
     <material>Gazebo/FlatBlack</material>
   </gazebo>
-  <gazebo reference="caster_back_left_link">
+  <gazebo reference="caster_back_right_link">
     <mu1>0.1</mu1>
     <mu2>0.1</mu2>
     <kp>1000000.0</kp>
@@ -98,13 +101,13 @@
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>
       <odometrySource>world</odometrySource>
-      <publishOdomTF>true</publishOdomTF>
+      <publishOdomTF>false</publishOdomTF>
       <robotBaseFrame>base_footprint</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
-      <publishTf>true</publishTf>
+      <publishTf>false</publishTf>
       <publishWheelJointState>false</publishWheelJointState>
       <legacyMode>false</legacyMode>
-      <updateRate>15</updateRate>
+      <updateRate>10</updateRate>
       <leftJoint>wheel_left_joint</leftJoint>
       <rightJoint>wheel_right_joint</rightJoint>
       <wheelSeparation>0.287</wheelSeparation>
@@ -116,8 +119,8 @@
   </gazebo>
   <gazebo>
     <plugin filename="libgazebo_ros_joint_state_publisher.so" name="openrover_caster_publisher">
-      <jointName>caster_back_left_joint,caster_back_right_joint,wheel_left_joint,wheel_right_joint</jointName>
-      <updateRate>15</updateRate>
+      <jointName>wheel_left_joint,wheel_right_joint,caster_back_left_joint,caster_back_right_joint</jointName>
+      <updateRate>30</updateRate>
     </plugin>
   </gazebo>
   <gazebo>
@@ -128,7 +131,7 @@
       <topicName>imu/data</topicName>
       <serviceName>imu_service</serviceName>
       <gaussianNoise>0.0</gaussianNoise>
-      <updateRate>20</updateRate>
+      <updateRate>30</updateRate>
       <imu>
         <noise>
           <type>gaussian</type>
@@ -174,7 +177,7 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin filename="libgazebo_ros_laser.so" name="gazebo_ros_lds_lfcd_controller">
+      <plugin filename="libgazebo_ros_gpu_laser.so" name="gazebo_ros_lds_lfcd_controller">
         <topicName>scan</topicName>
         <frameName>lidar_link</frameName>
       </plugin>
@@ -191,19 +194,24 @@
       <origin rpy="0 0 1.57" xyz="-0.142 0 0.055"/>
       <geometry>
         <mesh filename="package://openrover_demo/meshes/2WD_OpenRover.stl" scale="1 1 1"/>
+        <!--
+      <origin xyz="-0.142 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.42 0.25 0.12"/>
+        -->
       </geometry>
-      <material name="light_black"/>
+      <material name="dark"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="-0.14 0 0"/>
+      <origin rpy="0 0 0" xyz="-0.142 0 0"/>
       <geometry>
         <box size="0.42 0.25 0.12"/>
       </geometry>
     </collision>
     <inertial>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="-0.142 0 0"/>
       <mass value="7.5"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="4.806e-2" ixy="0.0" ixz="0.0" iyy="1.193e-1" iyz="0.0" izz="1.493e-1"/>
     </inertial>
   </link>
   <joint name="wheel_left_joint" type="continuous">
@@ -217,19 +225,24 @@
       <origin rpy="-1.57 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://openrover_demo/meshes/left_wheel.stl" scale="1 1 1"/>
+        <!--
+      <origin xyz="0 0 0" rpy="0 0 3.14"/>
+      <geometry>
+        <cylinder length="0.07" radius="0.12"/>
+        -->
       </geometry>
-      <material name="light_black"/>
+      <material name="black"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 3.14" xyz="0 0 0"/>
       <geometry>
         <cylinder length="0.07" radius="0.12"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 0 0"/>
+      <origin rpy="0 0 3.14" xyz="0 0 0"/>
       <mass value="1.525"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="6.723e-3" ixy="0.0" ixz="0.0" iyy="6.723e-3" iyz="0.0" izz="1.220e-2"/>
     </inertial>
   </link>
   <joint name="wheel_right_joint" type="continuous">
@@ -243,8 +256,13 @@
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://openrover_demo/meshes/right_wheel.stl" scale="1 1 1"/>
+        <!--
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.07" radius="0.12"/>
+        -->
       </geometry>
-      <material name="light_black"/>
+      <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -253,9 +271,9 @@
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="1.525"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="6.723e-3" ixy="0.0" ixz="0.0" iyy="6.723e-3" iyz="0.0" izz="1.220e-2"/>
     </inertial>
   </link>
   <joint name="sheetmetal_joint" type="fixed">
@@ -268,19 +286,24 @@
       <origin rpy="1.57 0 -1.57" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://openrover_demo/meshes/sheetmetal_part.stl" scale="1 1 1"/>
+        <!--
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.065 0.4 0.008"/>
+        -->
       </geometry>
-      <material name="light_black"/>
+      <material name="dark"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="-0.05 0 0"/>
+      <origin rpy="0 0 0" xyz="-0.007 0 0"/>
       <geometry>
-        <box size="0.065 0.3 0.008"/>
+        <box size="0.065 0.4 0.008"/>
       </geometry>
     </collision>
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="0.6"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="8.020e-3" ixy="0.0" ixz="0.0" iyy="2.313e-4" iyz="0.0" izz="8.211e-3"/>
     </inertial>
   </link>
   <joint name="plate_link_joint" type="fixed">
@@ -294,12 +317,12 @@
       <geometry>
         <box size="0.381 0.254 0.005"/>
       </geometry>
-      <material name="light_black"/>
+      <material name="acrylic"/>
     </visual>
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="0.65"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="3.496e-3" ixy="0.0" ixz="0.0" iyy="7.864e-3" iyz="0.0" izz="1.136e-2"/>
     </inertial>
   </link>
   <joint name="imu_link_joint" type="fixed">
@@ -313,12 +336,12 @@
       <geometry>
         <box size="0.01 0.01 0.002"/>
       </geometry>
-      <material name="light_black"/>
+      <material name="blue"/>
     </visual>
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="0.04"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="3.467e-7" ixy="0.0" ixz="0.0" iyy="3.467e-7" iyz="0.0" izz="6.667e-7"/>
     </inertial>
   </link>
   <joint name="cpu_link_joint" type="fixed">
@@ -336,8 +359,8 @@
     </visual>
     <inertial>
       <origin xyz="0 0 0"/>
-      <mass value="0.640"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <mass value="0.64"/>
+      <inertia ixx="8.634e-4" ixy="0.0" ixz="0.0" iyy="7.905e-4" iyz="0.0" izz="1.387e-3"/>
     </inertial>
   </link>
   <joint name="lidar_link_joint" type="fixed">
@@ -356,39 +379,13 @@
     <inertial>
       <origin xyz="0 0 0"/>
       <mass value="0.220"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
-    </inertial>
-  </link>
-  <joint name="caster_back_right_joint" type="continuous">
-    <parent link="base_link"/>
-    <child link="caster_back_right_link"/>
-    <origin rpy="0 0 0" xyz="-0.36 -0.17 -0.01"/>
-    <axis xyz="0 0 1"/>
-  </joint>
-  <link name="caster_back_right_link">
-    <visual>
-      <origin rpy="1.57 0 3.14" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="package://openrover_demo/meshes/right_caster_wheel.stl" scale="1 1 1"/>
-      </geometry>
-      <material name="light_black"/>
-    </visual>
-    <collision>
-      <origin rpy="1.57 0 0" xyz="-0.028 0 -0.065"/>
-      <geometry>
-        <cylinder length="0.035" radius="0.048"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="0.6"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <inertia ixx="1.214e-4" ixy="0.0" ixz="0.0" iyy="1.214e-4" iyz="0.0" izz="1.597e-4"/>
     </inertial>
   </link>
   <joint name="caster_back_left_joint" type="continuous">
-    <parent link="base_link"/>
+    <parent link="sheetmetal_link"/>
     <child link="caster_back_left_link"/>
-    <origin rpy="0 0 0" xyz="-0.36 0.17 -0.01"/>
+    <origin rpy="0 0 0" xyz="-0.01 0.17 -0.01"/>
     <axis xyz="0 0 1"/>
   </joint>
   <link name="caster_back_left_link">
@@ -396,19 +393,55 @@
       <origin rpy="1.57 0 3.14" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://openrover_demo/meshes/left_caster_wheel.stl" scale="1 1 1"/>
+        <!--
+      <origin xyz="-0.028 0 -0.065" rpy="1.57 0 3.14"/>
+      <geometry>
+        <cylinder length="0.035" radius="0.048"/>
+        -->
       </geometry>
-      <material name="light_black"/>
+      <material name="grey"/>
     </visual>
     <collision>
-      <origin rpy="1.57 0 0" xyz="-0.028 0 -0.065"/>
+      <origin rpy="1.57 0 3.14" xyz="-0.028 0 -0.065"/>
       <geometry>
         <cylinder length="0.035" radius="0.048"/>
       </geometry>
     </collision>
     <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="0.6"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+      <origin xyz="-0.005 0 -0.03"/>
+      <mass value="0.41"/>
+      <inertia ixx="3.841e-4" ixy="0.0" ixz="0.0" iyy="4.592e-4" iyz="0.0" izz="2.135e-4"/>
+    </inertial>
+  </link>
+  <joint name="caster_back_right_joint" type="continuous">
+    <parent link="sheetmetal_link"/>
+    <child link="caster_back_right_link"/>
+    <origin rpy="0 0 0" xyz="-0.01 -0.17 -0.01"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="caster_back_right_link">
+    <visual>
+      <origin rpy="1.57 0 3.14" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://openrover_demo/meshes/right_caster_wheel.stl" scale="1 1 1"/>
+        <!--
+      <origin xyz="-0.028 0 -0.065" rpy="1.57 0 3.14"/>
+      <geometry>
+        <cylinder length="0.035" radius="0.048"/>
+        -->
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin rpy="1.57 0 3.14" xyz="-0.028 0 -0.065"/>
+      <geometry>
+        <cylinder length="0.035" radius="0.048"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.005 0 -0.03"/>
+      <mass value="0.41"/>
+      <inertia ixx="3.841e-4" ixy="0.0" ixz="0.0" iyy="4.592e-4" iyz="0.0" izz="2.135e-4"/>
     </inertial>
   </link>
 </robot>
