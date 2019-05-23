@@ -82,10 +82,10 @@ se_node:
     # do not provide some of the state variables estimated by the filter. For example, a TwistWithCovarianceStamped message
     # has no pose information, so the first six values would be meaningless in that case. Each vector defaults to all false
     # if unspecified, effectively making this parameter required for each sensor.
-    odom0_config: [true,  true,  false,
+    odom0_config: [false, false, false,
                    false, false, false,
-                   false, false, false,
-                   false, false, true,
+                   true,  true,  true, # vx,vy,vz
+                   true,  true,  true, # vroll,vpitch,vyaw
                    false, false, false]
 
     # If you have high-frequency data or are running with a low frequency parameter value, then you may want to increase
@@ -105,13 +105,13 @@ se_node:
     # data is converted to velocity data by differentiating the absolute pose measurements. These velocities are then
     # integrated as usual. NOTE: this only applies to sensors that provide pose measurements; setting differential to true
     # for twist measurements has no effect.
-    odom0_differential: true
+    odom0_differential: false
 
     # [ADVANCED] When the node starts, if this parameter is true, then the first measurement is treated as a "zero point"
     # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
     # difference is that the relative parameter doesn't cause the measurement to be converted to a velocity before
     # integrating it. If you simply want your measurements to start at 0 for a given sensor, set this to true.
-    odom0_relative: false
+    odom0_relative: true
 
     # [ADVANCED] If your data is subject to outliers, use these threshold settings, expressed as Mahalanobis distances, to
     # control how far away from the current vehicle state a sensor measurement is permitted to be. Each defaults to

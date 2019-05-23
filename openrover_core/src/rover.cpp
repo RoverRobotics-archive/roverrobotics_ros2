@@ -5,9 +5,9 @@
 #include "tf2/convert.h"
 #include <math.h>
 #include "data.hpp"
-#include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "rclcpp/node_options.hpp"
+#include "eigen3/Eigen/Dense"
 
 using std::placeholders::_1;
 using namespace openrover;
@@ -33,7 +33,6 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(16));
   pub_motor_efforts = create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
   pub_diagnostics = create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", rclcpp::QoS(1));
-  pub_obs_vel = create_publisher<geometry_msgs::msg::Twist>("obs_vel", rclcpp::QoS(2));
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom_raw", rclcpp::QoS(4));
 
   // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
@@ -190,56 +189,44 @@ void openrover::Rover::update_odom()
     RCLCPP_WARN(get_logger(), "Trying to compute odometry based on stale data");
   }
 
-  double left_encoder_frequency = (left_period->state == 0) ? 0 : 1.0 / (left_period->state);
-  if (!left_wheel_fwd)
-    left_encoder_frequency = -left_encoder_frequency;
-
-  // ^ the encoder doesn't actually have the wheel direction. So we fake it by assuming the same direction as the last
-  // commanded direction we gave to the wheel
-
-  double right_encoder_frequency = (right_period->state) == 0 ? 0 : 1.0 / (right_period->state);
-  if (!right_wheel_fwd)
-    right_encoder_frequency = -right_encoder_frequency;
+  Eigen::Vector2d encoder_frequency_lr;
+  Eigen::Vector2d encoder_frequency_lr_variance;
 
   // encoder displacement since last time we did odometry.
-  double left_encoder_displacement, right_encoder_displacement;
+  auto dt = (now - odom_last_time).seconds();
 
   // earlier versions of the firmware don't return the encoder position so we have to do it all based on the encoder
   // frequency
   if (left_encoder_position->state == 0 && right_encoder_position->state == 0)
   {
-    auto dt = (now - odom_last_time).seconds();
+    encoder_frequency_lr = { ((left_period->state == 0) ? 0 : 1.0 / (left_period->state)),
+                             ((right_period->state == 0) ? 0 : 1.0 / (right_period->state)) };
+    if (!left_wheel_fwd)
+      encoder_frequency_lr[0] *= -1;
+    if (!right_wheel_fwd)
+      encoder_frequency_lr[1] *= -1;
+    // ^ the encoder doesn't actually have the wheel direction. So we fake it by assuming the same direction as the last
+    // commanded direction we gave to the wheel
 
-    left_encoder_displacement = left_encoder_frequency * dt;
-    right_encoder_displacement = right_encoder_frequency * dt;
+    encoder_frequency_lr_variance = (0.05 * encoder_frequency_lr).array().square();
   }
   else
   {
-    left_encoder_displacement = (left_encoder_position->state - odom_last_encoder_position_left);
+    encoder_frequency_lr = { (left_encoder_position->state - odom_last_encoder_position_left) / dt,
+                             (right_encoder_position->state - odom_last_encoder_position_right) / dt };
     // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
     // a-b, whichever has the lower absolute value. This is exactly what we want.
-    right_encoder_displacement = (right_encoder_position->state - odom_last_encoder_position_right);
+    encoder_frequency_lr_variance.fill(1.0 / (dt * dt));
   }
 
-  auto displacement_linear = (right_encoder_displacement + left_encoder_displacement) * meters_per_encoder_sum;
-  auto displacement_angular = (right_encoder_displacement - left_encoder_displacement) * radians_per_encoder_difference;
+  Eigen::Matrix2d encoder_frequency_lr_to_twist_fl;
 
-  // forward velocity relative to the robot's current frame of reference
-  auto velocity_forward = (right_encoder_frequency + left_encoder_frequency) * meters_per_encoder_sum;
-  // rotational velocity relative to the robot's current frame of reference
-  auto velocity_yaw = (right_encoder_frequency - left_encoder_frequency) * radians_per_encoder_difference;
-
-  {
-    // velocity in rover's own coordinate frame
-    auto obs_vel = std::make_unique<Twist>();
-    obs_vel->linear.x = velocity_forward;
-    obs_vel->angular.z = velocity_yaw;
-    pub_obs_vel->publish(std::move(obs_vel));
-  }
-
-  auto new_x = odom_last_pos_x + cos(odom_last_yaw + displacement_angular / 2) * displacement_linear;
-  auto new_y = odom_last_pos_y + sin(odom_last_yaw + displacement_angular / 2) * displacement_linear;
-  auto new_yaw = fmod(odom_last_yaw + displacement_angular, 2 * M_PI);
+  encoder_frequency_lr_to_twist_fl << meters_per_encoder_sum,
+      meters_per_encoder_sum,  //
+      -radians_per_encoder_difference, +radians_per_encoder_difference;
+  auto twist = encoder_frequency_lr_to_twist_fl * encoder_frequency_lr;
+  auto twist_covariance = encoder_frequency_lr_to_twist_fl * encoder_frequency_lr_variance.asDiagonal() *
+                          encoder_frequency_lr_to_twist_fl.adjoint();
 
   {
     auto odom = std::make_unique<nav_msgs::msg::Odometry>();
@@ -248,25 +235,16 @@ void openrover::Rover::update_odom()
     odom->header.stamp = now;
 
     // In the odom_frame_id
-    tf2::Quaternion pose_q;
-    pose_q.setRPY(0, 0, new_yaw);
-    odom->pose.pose.position.x = new_x;
-    odom->pose.pose.position.y = new_y;
-    odom->pose.pose.orientation = toMsg(pose_q);
-    odom->pose.covariance = { 0 };
-    for (size_t i = 0; i < 6; i++)
-    {
-      // set these covariances high
-      odom->pose.covariance[i * 6 + i] = 1e-4;
-    }
+    odom->pose.covariance.fill(-1.0);
+
     // In the odom_child_frame_id
-    odom->twist.twist.linear.x = velocity_forward;
-    odom->twist.twist.angular.z = velocity_yaw;
-    odom->twist.covariance = { 0 };
-    for (size_t i = 0; i < 6; i++)
-    {
-      odom->twist.covariance[i * 6 + i] = 1e-4;
-    }
+    odom->twist.twist.linear.x = twist[0];
+    odom->twist.twist.angular.z = twist[1];
+
+    odom->twist.covariance.fill(0.0);
+    odom->twist.covariance[0 + 0 * 6] = twist_covariance(0, 0);
+    odom->twist.covariance[0 + 5 * 6] = odom->twist.covariance[5 + 0 * 6] = twist_covariance(0, 1);
+    odom->twist.covariance[5 + 5 * 6] = twist_covariance(1, 1);
 
     pub_odom->publish(std::move(odom));
   }
@@ -274,9 +252,6 @@ void openrover::Rover::update_odom()
   odom_last_encoder_position_left = left_encoder_position->state;
   odom_last_encoder_position_right = right_encoder_position->state;
   odom_last_time = now;
-  odom_last_pos_x = new_x;
-  odom_last_pos_y = new_y;
-  odom_last_yaw = new_yaw;
 }
 
 void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data)

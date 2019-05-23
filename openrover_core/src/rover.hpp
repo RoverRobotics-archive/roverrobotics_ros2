@@ -60,8 +60,6 @@ protected:
   rclcpp::TimerBase::SharedPtr tmr_odometry;
   void update_odom();
 
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_obs_vel;
-
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel;
