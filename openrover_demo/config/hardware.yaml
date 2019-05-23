@@ -1,7 +1,11 @@
-joint_state_publisher:
+rover_serial:
   ros__parameters:
-    publish_default_positions: true
-    rate: 30
+    serial_port: /dev/rover
+
+rover:
+  ros__parameters:
+    diagnostics_frequency: 1.0
+    odometry_frequency: 15.0
 
 rplidar_node:
   ros__parameters:
@@ -28,12 +32,3 @@ bno055_driver:
     calibration/gyroscope_offset: [-3, -3, -1]
     calibration/accelerometer_radius: 1000
     calibration/magnetometer_radius: 842
-
-rover_serial:
-  ros__parameters:
-    serial_port: /dev/rover
-
-rover:
-  ros__parameters:
-    diagnostics_frequency: 1.0
-    odometry_frequency: 10.0

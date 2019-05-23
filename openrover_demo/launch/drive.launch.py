@@ -1,45 +1,16 @@
 """
-Launch this on a payload tethered to the rover.
-Drives the rover in response to teleop messages and publishes odometry
-Runs LIDAR scanner
-Runs state publishers
+Brings up all the hardware and gets this rover ready to run
 """
-import os
-from pathlib import Path
 
 import launch
-from ament_index_python.packages import get_package_share_directory
-from launch_ros.actions import Node
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import ThisLaunchFileDir
 
 
 def generate_launch_description():
-    urdf = os.path.join(get_package_share_directory('openrover_demo'), 'urdf', 'rover.urdf')
-    assert Path(urdf).is_file()
-    drive_yaml = Path(get_package_share_directory('openrover_demo'), 'config', 'drive.yaml')
-    assert drive_yaml.is_file()
-    nodes = [
-        Node(
-            package='robot_state_publisher', node_executable='robot_state_publisher',
-            output='screen', arguments=[urdf]
-        ),
-        Node(
-            package='joint_state_publisher', node_executable='joint_state_publisher',
-            output='screen', arguments=[urdf], parameters=[drive_yaml]
-        ),
-        Node(
-            package='openrover_core', node_executable='rover', output='screen',
-            parameters=[drive_yaml]
-        ),
-        Node(package='bno055_driver',
-             node_executable='bno055_driver',
-             output='screen',
-             parameters=[drive_yaml]),
-        Node(
-            package='rplidar_ros',
-            node_executable='rplidarNode',
-            output='screen',
-            parameters=[drive_yaml],
-        ),
-    ]
-
-    return launch.LaunchDescription([*nodes])
+    return launch.LaunchDescription([
+        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/hardware.launch.py'])),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/presence.launch.py'])),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/teleop.launch.py'])),
+    ])
