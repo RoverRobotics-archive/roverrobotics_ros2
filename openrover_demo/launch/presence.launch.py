@@ -21,7 +21,7 @@ def generate_launch_description():
     return launch.LaunchDescription([
         Node(
             package='robot_state_publisher', node_executable='robot_state_publisher',
-            output='screen', arguments=[str(urdf)]
+            output='screen', arguments=[str(urdf)], parameters=[yaml]
         ),
         Node(
             package='robot_localization',
