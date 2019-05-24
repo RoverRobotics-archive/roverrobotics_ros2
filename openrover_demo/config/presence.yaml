@@ -1,8 +1,3 @@
-joint_state_publisher:
-  ros__parameters:
-    publish_default_positions: true
-    rate: 30
-
 se_node:
   ros__parameters:
     # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin

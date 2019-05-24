@@ -13,6 +13,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     yaml = Path(get_package_share_directory('openrover_demo'), 'config', 'presence.yaml')
+    assert yaml.is_file()
     urdf = Path(get_package_share_directory('openrover_demo'), 'urdf', 'rover.urdf')
     assert urdf.is_file()
 
@@ -21,10 +22,6 @@ def generate_launch_description():
         Node(
             package='robot_state_publisher', node_executable='robot_state_publisher',
             output='screen', arguments=[str(urdf)]
-        ),
-        Node(
-            package='joint_state_publisher', node_executable='joint_state_publisher',
-            output='screen', arguments=[str(urdf)], parameters=[yaml]
         ),
         Node(
             package='robot_localization',

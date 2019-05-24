@@ -12,6 +12,8 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    urdf = Path(get_package_share_directory('openrover_demo'), 'urdf', 'rover.urdf')
+    assert urdf.is_file()
     yaml = Path(get_package_share_directory('openrover_demo'), 'config', 'hardware.yaml')
     assert yaml.is_file()
     nodes = [
@@ -30,6 +32,12 @@ def generate_launch_description():
             node_executable='rplidarNode',
             output='screen',
             parameters=[yaml],
+        ),
+        # todo: this publishes static positions for wheel. Switch to publishing wheel position
+        # based on encoder data
+        Node(
+            package='joint_state_publisher', node_executable='joint_state_publisher',
+            output='screen', arguments=[str(urdf)], parameters=[yaml]
         ),
     ]
 
