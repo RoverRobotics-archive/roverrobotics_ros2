@@ -207,8 +207,6 @@ void openrover::Rover::update_odom()
       encoder_frequency_lr[1] *= -1;
     // ^ the encoder doesn't actually have the wheel direction. So we fake it by assuming the same direction as the last
     // commanded direction we gave to the wheel
-
-    encoder_frequency_lr_variance = (0.05 * encoder_frequency_lr).array().square();
   }
   else
   {
@@ -216,8 +214,8 @@ void openrover::Rover::update_odom()
                              (right_encoder_position->state - odom_last_encoder_position_right) / dt };
     // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
     // a-b, whichever has the lower absolute value. This is exactly what we want.
-    encoder_frequency_lr_variance.fill(1.0 / (dt * dt));
   }
+  encoder_frequency_lr_variance = (0.1 * encoder_frequency_lr).array().square();
 
   Eigen::Matrix2d encoder_frequency_lr_to_twist_fl;
 
