@@ -4,10 +4,11 @@ project(openrover_demo)
 find_package(ament_cmake REQUIRED)
 
 install(DIRECTORY
-    launch
-    config
-    meshes
-    urdf
-    DESTINATION share/${PROJECT_NAME})
+  launch
+  config
+  meshes
+  urdf
+  maps
+  DESTINATION share/${PROJECT_NAME})
 
 ament_package()
