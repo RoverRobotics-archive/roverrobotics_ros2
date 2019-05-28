@@ -12,5 +12,4 @@ def generate_launch_description():
     return launch.LaunchDescription([
         IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/hardware.launch.py'])),
         IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/presence.launch.py'])),
-        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/teleop.launch.py'])),
     ])
