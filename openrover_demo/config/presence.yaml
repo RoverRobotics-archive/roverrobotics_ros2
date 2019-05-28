@@ -107,7 +107,7 @@ se_node:
     odom0_differential: false
 
     # [ADVANCED] When the node starts, if this parameter is true, then the first measurement is treated as a "zero point"
-    # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
+    # for all future measurements. While you can achieve the same effect with the differential parameter, the key
     # difference is that the relative parameter doesn't cause the measurement to be converted to a velocity before
     # integrating it. If you simply want your measurements to start at 0 for a given sensor, set this to true.
     odom0_relative: true
@@ -123,7 +123,7 @@ se_node:
 
     imu0: imu/data
     imu0_config: [false, false, false,
-                  true,  true,  true,
+                  false, false, false,
                   false, false, false,
                   true,  true,  true,
                   true,  true,  true]
