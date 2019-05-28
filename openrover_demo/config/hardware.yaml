@@ -6,6 +6,8 @@ rover:
   ros__parameters:
     diagnostics_frequency: 1.0
     odometry_frequency: 15.0
+    meters_per_encoder_sum: 0.00067390542
+    radians_per_encoder_difference: 0.0037130276
 
 rplidar_node:
   ros__parameters:
