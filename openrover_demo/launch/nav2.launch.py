@@ -79,8 +79,10 @@ def generate_launch_description():
         launch.actions.OpaqueFunction(function=(lambda *args: time.sleep(1))),
         launch_ros.actions.Node(
             package='nav2_bt_navigator',
+            node_name='bt_navigator',
             node_executable='bt_navigator',
             output='screen',
-            parameters=[params_file]
+            parameters=[params_file, {
+                'bt_xml_filename': bt_navigator_xml}]
         )
     ])
