@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import time
 
 import launch.actions
 import launch_ros.actions
@@ -44,38 +45,38 @@ def generate_launch_description():
             node_name='map_server',
             output='screen',
             parameters=[{'use_sim_time': use_sim_time}, {'yaml_filename': map_yaml_file}]),
-
+        # lots of problems in the launch file related to spinning up too much at the same time.
+        # this ugly hack spaces things out to prevent crashes.
+        launch.actions.OpaqueFunction(function=(lambda *args: time.sleep(1))),
         launch_ros.actions.Node(
             package='nav2_world_model',
             node_executable='world_model',
             output='screen',
-            parameters=[params_file]),
-
+            parameters=[params_file]
+        ),
         launch_ros.actions.Node(
             package='nav2_amcl',
             node_executable='amcl',
             output='screen',
             parameters=[params_file],
         ),
-
         launch_ros.actions.Node(
             package='dwb_controller',
             node_executable='dwb_controller',
             output='screen',
             parameters=[params_file]),
-
+        launch.actions.OpaqueFunction(function=(lambda *args: time.sleep(1))),
         launch_ros.actions.Node(
             package='nav2_navfn_planner',
             node_executable='navfn_planner',
             output='screen',
         ),
-
         launch_ros.actions.Node(
             package='nav2_motion_primitives',
             node_executable='motion_primitives_node',
             output='screen',
         ),
-
+        launch.actions.OpaqueFunction(function=(lambda *args: time.sleep(1))),
         launch_ros.actions.Node(
             package='nav2_bt_navigator',
             node_executable='bt_navigator',
