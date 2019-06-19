@@ -11,6 +11,8 @@
 #include <data.hpp>
 #include "nav_msgs/msg/odometry.hpp"
 #include "timestamped.hpp"
+#include "pi_controller.hpp"
+#include "eigen3/Eigen/Dense"
 
 namespace openrover
 {
@@ -28,28 +30,25 @@ protected:
   /// Rotational speed (rad/s) this rover will attain pushing its motors at full efford in opposite directions
   double top_speed_angular;
 
-  /// If both motor encoders have traveled a combined n increments, this times n is how far the rover has traveled.
-  double meters_per_encoder_sum;
-  /// If the left motor encoder has traveled n increments more than the right motor encoder,
-  /// this times n is how far the rover has rotated
-  double radians_per_encoder_difference;
+  /// Describes the relation between the encoder frequencies and the rover velocity
+  Eigen::Matrix2d encoder_frequency_lr_to_twist_fl;
 
   std::string odom_frame_id;
   std::string odom_child_frame_id;
 
-  bool left_wheel_fwd;
-  bool right_wheel_fwd;
-  double odom_last_pos_x;
-  double odom_last_pos_y;
-  double odom_last_yaw;
+  std::unique_ptr<PIController> left_motor_controller;
+  std::unique_ptr<PIController> right_motor_controller;
+
+  bool left_wheel_fwd{};
+  bool right_wheel_fwd{};
 
   /// Callback for velocity commands
   void on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg);
   /// Callback for new raw data received
   void on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data);
+  void update_diagnostics();
 
   rclcpp::TimerBase::SharedPtr tmr_diagnostics;
-  void update_diagnostics();
 
   rclcpp::Time odom_last_time;
   data::LeftMotorEncoderState::Value odom_last_encoder_position_left;
@@ -74,7 +73,7 @@ protected:
   {
     try
     {
-      auto raw = *this->most_recent_data.at(T::which());
+      auto raw = *most_recent_data.at(T::which());
       auto value = T::decode(raw.state);
       return std::make_unique<Timestamped<typename T::Value>>(raw.time, value);
     }

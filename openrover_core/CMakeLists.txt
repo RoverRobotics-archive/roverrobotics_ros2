@@ -26,9 +26,10 @@ file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
 add_executable(rover
         src/composition.cpp
-  src/rover_serial.cpp
+        src/rover_serial.cpp
         src/rover.cpp
         src/data.cpp
+        src/pi_controller.cpp
         ${AllHeaders}
         )
 

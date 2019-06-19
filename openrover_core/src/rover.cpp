@@ -3,11 +3,10 @@
 #include <cmath>
 #include <chrono>
 #include "tf2/convert.h"
-#include <math.h>
+#include <Eigen/src/Core/Matrix.h>
 #include "data.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "rclcpp/node_options.hpp"
-#include "eigen3/Eigen/Dense"
 
 using std::placeholders::_1;
 using namespace openrover;
@@ -20,7 +19,7 @@ using Cls = Rover;
 
 Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
-  RCLCPP_INFO(this->get_logger(), "Starting rover driver node");
+  RCLCPP_INFO(get_logger(), "Starting rover driver node");
 
   sub_raw_data = create_subscription<msg::RawData>("raw_data", rclcpp::QoS(16), std::bind(&Cls::on_raw_data, this, _1));
   double diagnostics_frequency = declare_parameter("diagnostics_frequency", 1.0);
@@ -38,13 +37,30 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   // based on the physical capabilities of the rover. Depends on the wheel configuration (2wd/4wd/treads) and terrain
   top_speed_linear = declare_parameter("top_speed_linear", 3.05);
   top_speed_angular = declare_parameter("top_speed_angular", 16.2);
+
+  /// If both motor encoders have traveled a combined n increments, this times n is how far the rover has traveled.
   // this value determined by driving straight and dividing distance by average encoder reading
-  meters_per_encoder_sum = declare_parameter("meters_per_encoder_sum", 0.0006875);
-  // this value determined by driving in a circle and dividing rotation by difference in encoder readings
-  radians_per_encoder_difference = declare_parameter("radians_per_encoder_difference", 0.00371);
+  auto meters_per_encoder_sum = declare_parameter("meters_per_encoder_sum", 0.0006875);
+  /// If the left motor encoder has traveled n increments more than the right motor encoder,
+  /// this times n is how far the rover has rotated
+  /// this value determined by driving in a circle and dividing rotation by difference in encoder readings
+  auto radians_per_encoder_difference = declare_parameter("radians_per_encoder_difference", 0.00371);
 
   odom_frame_id = declare_parameter("odom_frame_id", "odom");
   odom_child_frame_id = declare_parameter("odom_child_frame_id", "base_footprint");
+
+  encoder_frequency_lr_to_twist_fl <<  //
+      meters_per_encoder_sum,
+      meters_per_encoder_sum,  //
+      -radians_per_encoder_difference, +radians_per_encoder_difference;
+
+  auto pi_p = declare_parameter("motor_control_gain_p", 0.0001);
+  auto pi_i = declare_parameter("motor_control_gain_i", 0.01);
+  auto pi_windup = declare_parameter("motor_control_windup", 10);
+  auto now = get_clock()->now();
+
+  left_motor_controller = std::make_unique<PIController>(pi_p, pi_i, pi_windup, now);
+  right_motor_controller = std::make_unique<PIController>(pi_p, pi_i, pi_windup, now);
 }
 
 /// Takes a number between -1.0 and +1.0 and converts it to the nearest motor command value.
@@ -77,21 +93,23 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
     RCLCPP_WARN(get_logger(), "Requested angular velocity %f higher than maximum %f", turn_rate, top_speed_angular);
   }
 
-  // convert the requested speeds to per-motor speeds of [-1.0,+1.0]
-  double l_motor = (linear_rate / top_speed_linear) - (turn_rate / top_speed_angular);
-  double r_motor = (linear_rate / top_speed_linear) + (turn_rate / top_speed_angular);
+  Eigen::Vector2d twist_fl(linear_rate, turn_rate);
+
+  RCLCPP_INFO(get_logger(), "target velocity = fwd:%f ccw:%f", linear_rate, turn_rate);
+  auto encoder_target_freqs = encoder_frequency_lr_to_twist_fl.inverse() * twist_fl;
+
+  auto l_motor = encoder_target_freqs[0];
+  auto r_motor = encoder_target_freqs[1];
+  RCLCPP_INFO(get_logger(), "left motor %f", l_motor);
 
   // save off wheel direction for odometry purposes
   left_wheel_fwd = (l_motor >= 0);
   right_wheel_fwd = (r_motor >= 0);
 
-  // and translate speeds to the hardware values [0, 250]
-  openrover_core_msgs::msg::RawMotorCommand e;
-  e.left = to_motor_command(l_motor);
-  e.right = to_motor_command(r_motor);
-  e.flipper = to_motor_command(0);  // todo
+  left_motor_controller->set_target(l_motor);
+  right_motor_controller->set_target(r_motor);
 
-  pub_motor_efforts->publish(e);
+  RCLCPP_DEBUG(get_logger(), "Updated target motor speeds %f %f", l_motor, r_motor);
 }
 
 void openrover::Rover::update_diagnostics()
@@ -165,7 +183,7 @@ void openrover::Rover::update_odom()
 
   if (!left_encoder_position || !right_encoder_position || !left_period || !right_period)
   {
-    RCLCPP_INFO(get_logger(), "Odometry not ready yet");
+    RCLCPP_WARN_SKIPFIRST(get_logger(), "Odometry not ready yet");
     return;
   }
 
@@ -176,10 +194,6 @@ void openrover::Rover::update_odom()
     odom_last_encoder_position_right = right_encoder_position->state;
     odom_last_time = now;
 
-    // we have no idea where we are, so this is a reasonable starting value
-    odom_last_pos_x = 0;
-    odom_last_pos_y = 0;
-    odom_last_yaw = 0;
     return;
   }
 
@@ -189,14 +203,12 @@ void openrover::Rover::update_odom()
     RCLCPP_WARN(get_logger(), "Trying to compute odometry based on stale data");
   }
 
-  Eigen::Vector2d encoder_frequency_lr;
-  Eigen::Vector2d encoder_frequency_lr_variance;
-
   // encoder displacement since last time we did odometry.
   auto dt = (now - odom_last_time).seconds();
 
-  // earlier versions of the firmware don't return the encoder position so we have to do it all based on the encoder
-  // frequency
+  // Determine encoder frequency.
+  // earlier versions of the firmware don't return the encoder position so we have to make do with the period estimate
+  Eigen::Vector2d encoder_frequency_lr;
   if (left_encoder_position->state == 0 && right_encoder_position->state == 0)
   {
     encoder_frequency_lr = { ((left_period->state == 0) ? 0 : 1.0 / (left_period->state)),
@@ -215,17 +227,25 @@ void openrover::Rover::update_odom()
     // ^ remember these values are signed. But taking the difference a-b as signed ints will give either a-b or 1<<16 -
     // a-b, whichever has the lower absolute value. This is exactly what we want.
   }
+
+  // drive the motors based on closed-loop control
+  {
+    auto l_effort = left_motor_controller->step(now, encoder_frequency_lr[0]);
+    auto r_effort = right_motor_controller->step(now, encoder_frequency_lr[1]);
+
+    openrover_core_msgs::msg::RawMotorCommand e;
+    e.left = to_motor_command(l_effort);
+    e.right = to_motor_command(r_effort);
+    e.flipper = to_motor_command(0);  // todo
+    pub_motor_efforts->publish(e);
+  }
+
+  // determine the rover's current velocity and publish for state estimation
+  Eigen::Vector2d encoder_frequency_lr_variance;
   encoder_frequency_lr_variance = (0.1 * encoder_frequency_lr).array().square();
-
-  Eigen::Matrix2d encoder_frequency_lr_to_twist_fl;
-
-  encoder_frequency_lr_to_twist_fl << meters_per_encoder_sum,
-      meters_per_encoder_sum,  //
-      -radians_per_encoder_difference, +radians_per_encoder_difference;
   auto twist = encoder_frequency_lr_to_twist_fl * encoder_frequency_lr;
   auto twist_covariance = encoder_frequency_lr_to_twist_fl * encoder_frequency_lr_variance.asDiagonal() *
                           encoder_frequency_lr_to_twist_fl.adjoint();
-
   {
     auto odom = std::make_unique<nav_msgs::msg::Odometry>();
     odom->header.frame_id = odom_frame_id;

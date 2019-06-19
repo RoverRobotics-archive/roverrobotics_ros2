@@ -17,22 +17,15 @@ import os
 import launch.actions
 import launch_ros.actions
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 
 
-# ros2 launch openrover_demo nav2.launch.py map:=install/share/openrover_demo/maps/map.yaml
 def generate_launch_description():
     params_file = launch.substitutions.LaunchConfiguration('params', default=os.path.join(
         get_package_share_directory('openrover_demo'), 'config', 'nav2.yaml'))
 
-    return LaunchDescription([
-        launch_ros.actions.Node(
-            node_name='lifecycle_manager',
-            package='nav2_lifecycle_manager',
-            node_executable='lifecycle_manager',
-            output='screen',
-            parameters=[params_file]
-        ),
+    lifecycle_nodes = [
         launch_ros.actions.LifecycleNode(
             node_name='map_server',
             package='nav2_map_server',
@@ -55,15 +48,18 @@ def generate_launch_description():
             parameters=[params_file]
         ),
         launch_ros.actions.LifecycleNode(
+            node_name='dwb_controller',
+            package='dwb_controller',
+            node_executable='dwb_controller',
+            output='screen',
+            parameters=[params_file],
+        ),
+        launch_ros.actions.LifecycleNode(
             node_name='navfn_planner',
             package='nav2_navfn_planner',
             node_executable='navfn_planner',
             output='screen',
-        ),
-        launch_ros.actions.Node(
-            package='nav2_motion_primitives',
-            node_executable='motion_primitives_node',
-            output='screen',
+            parameters=[params_file]
         ),
         launch_ros.actions.LifecycleNode(
             node_name='bt_navigator',
@@ -72,11 +68,29 @@ def generate_launch_description():
             output='screen',
             parameters=[params_file]
         ),
-        launch_ros.actions.LifecycleNode(
-            node_name='dwb_controller',
-            package='dwb_controller',
-            node_executable='dwb_controller',
+    ]
+
+    return LaunchDescription([
+        *lifecycle_nodes,
+        launch_ros.actions.Node(
+            node_name='motion_primitives_node',
+            package='nav2_motion_primitives',
+            node_executable='motion_primitives_node',
             output='screen',
             parameters=[params_file]
+        ),
+        launch_ros.actions.Node(
+            node_name='lifecycle_manager',
+            package='nav2_lifecycle_manager',
+            node_executable='lifecycle_manager',
+            output='screen',
+            parameters=[
+                params_file,
+                {
+                    'autostart': True,
+                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller', 'navfn_planner',
+                                   'bt_navigator'],
+                }
+            ]
         ),
     ])
