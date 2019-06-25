@@ -46,12 +46,11 @@ ament_target_dependencies(rover
         openrover_core_msgs
         diagnostic_msgs
         nav_msgs
-        tf2
         tf2_geometry_msgs
         )
 
 install(TARGETS
-  rover
+        rover
         DESTINATION lib/${PROJECT_NAME}
         )
 
