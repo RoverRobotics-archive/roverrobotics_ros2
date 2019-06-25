@@ -37,6 +37,7 @@ amcl:
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
+    use_map_topic_: false
 
 amcl_map_client:
   ros__parameters:
@@ -96,12 +97,12 @@ global_costmap:
   world_model:
     ros__parameters:
       transform_tolerance: 1.0
-      static_layer.first_map_from_service: false
+      static_layer.first_map_from_service: true
 
 local_costmap:
   dwb_controller:
     ros__parameters:
-      static_layer.first_map_from_service: false
+      static_layer.first_map_from_service: true
 
   local_costmap:
     ros__parameters:
