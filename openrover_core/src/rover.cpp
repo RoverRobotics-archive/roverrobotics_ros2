@@ -95,12 +95,11 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
 
   Eigen::Vector2d twist_fl(linear_rate, turn_rate);
 
-  RCLCPP_INFO(get_logger(), "target velocity = fwd:%f ccw:%f", linear_rate, turn_rate);
+  RCLCPP_DEBUG(get_logger(), "target velocity = fwd:%f ccw:%f", linear_rate, turn_rate);
   auto encoder_target_freqs = encoder_frequency_lr_to_twist_fl.inverse() * twist_fl;
 
   auto l_motor = encoder_target_freqs[0];
   auto r_motor = encoder_target_freqs[1];
-  RCLCPP_INFO(get_logger(), "left motor %f", l_motor);
 
   // save off wheel direction for odometry purposes
   left_wheel_fwd = (l_motor >= 0);
