@@ -6,28 +6,30 @@ State estimation computes and broadcasts the rover's location and velocity
 
 from pathlib import Path
 
-import launch
 from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import SetEnvironmentVariable
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    yaml = Path(get_package_share_directory('openrover_demo'), 'config', 'presence.yaml')
-    assert yaml.is_file()
+    presence_config = Path(get_package_share_directory('openrover_demo'), 'config', 'presence.yaml')
+    assert presence_config.is_file()
     urdf = Path(get_package_share_directory('openrover_demo'), 'urdf', 'rover.urdf')
     assert urdf.is_file()
 
-    assert yaml.is_file()
-    return launch.LaunchDescription([
+    assert presence_config.is_file()
+    return LaunchDescription([
+        SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
         Node(
             package='robot_state_publisher', node_executable='robot_state_publisher',
-            output='screen', arguments=[str(urdf)], parameters=[yaml]
+            output='screen', arguments=[str(urdf)], parameters=[presence_config]
         ),
         Node(
             package='robot_localization',
             node_executable='se_node',
             output='screen',
-            parameters=[yaml],
+            parameters=[presence_config],
             remappings=[
                 ('odometry/filtered', 'odom')
             ]
