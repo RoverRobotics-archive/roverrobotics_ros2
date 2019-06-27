@@ -25,7 +25,7 @@ bno055_driver:
     self_manage: true
     use_magnetometer: false
 
-    angular_velocity_stdev: 0.0052
+    angular_velocity_stdev: 0.01
     linear_acceleration_stdev: 0.0015
     magnetic_field_stdev: 0.0000005
     orientation_stdev: 0.000001
