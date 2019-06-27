@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler, EmitEvent
+from launch.actions import RegisterEventHandler, EmitEvent, SetEnvironmentVariable
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
 from launch_ros.actions import Node
@@ -36,7 +36,7 @@ def generate_launch_description():
     ) for n in nodes]
 
     return LaunchDescription([
-        launch.actions.SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
         *nodes,
         *events
     ])
