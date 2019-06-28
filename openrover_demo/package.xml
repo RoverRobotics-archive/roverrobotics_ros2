@@ -4,9 +4,10 @@
     <name>openrover_demo</name>
     <version>0.0.0</version>
     <description>Example of how to operate a robot with ROS2 using the OpenRover platform.</description>
-    <author email="info@roverrobotics.com">Rover Robotics</author>
     <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
     <license>BSD-3-Clause</license>
+
+    <author email="info@roverrobotics.com">Rover Robotics</author>
 
     <buildtool_depend>ament_cmake</buildtool_depend>
 
