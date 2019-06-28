@@ -100,10 +100,9 @@ global_costmap:
       static_layer.first_map_from_service: true
       always_send_full_costmap: true
       use_sim_time: false
-      robot_radius: 0.27
-      inflation_layer.cost_scaling_factor: 3.0
+      robot_radius: 0.17
       obstacle_layer:
-        enabled: False
+        enabled: True
       observation_sources: scan
       scan:
         topic: /scan
@@ -115,19 +114,22 @@ global_costmap:
 local_costmap:
   dwb_controller:
     ros__parameters:
-      plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::StaticLayer", "nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
+      plugin_names: ["obstacle_layer", "inflation_layer"]
+      plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
       global_frame: map
       always_send_full_costmap: true
       use_sim_time: false
-      robot_radius: 0.27
-      inflation_layer.cost_scaling_factor: 3.0
-      obstacle_layer.enabled: True
+      robot_radius: 0.17
+      inflation_layer:
+        cost_scaling_factor: 3.0
+      obstacle_layer:
+        enabled: True
       observation_sources: scan
-      scan.topic: /scan
-      scan.max_obstacle_height: 2.0
-      scan.clearing: True
-      scan.marking: True
+      scan:
+        topic: /scan
+        max_obstacle_height: 2.0
+        clearing: True
+        marking: True
 
 map_server:
   ros__parameters:
