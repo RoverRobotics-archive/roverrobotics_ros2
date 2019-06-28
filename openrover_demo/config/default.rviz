@@ -5,15 +5,10 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Status1
-        - /TF1
         - /TF1/Frames1
         - /TF1/Tree1
-        - /LaserScan1
+        - /Map1/Position1
         - /Map1/Orientation1
-        - /PoseArray1
-        - /Map2
-        - /Map3
       Splitter Ratio: 0.4897119402885437
     Tree Height: 1154
   - Class: rviz_common/Selection
@@ -27,7 +22,7 @@ Panels:
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
-      - /Current View1/Focal Point1
+      - /Orbit1
     Name: Views
     Splitter Ratio: 0.5
 Visualization Manager:
@@ -56,20 +51,6 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
-          Value: true
-        base_link:
-          Value: true
-        cpu_link:
-          Value: true
-        imu_link:
-          Value: true
-        lidar_link:
-          Value: true
-        plate_link:
-          Value: true
-        sheetmetal_link:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: false
@@ -116,7 +97,7 @@ Visualization Manager:
       Max Intensity: 47
       Min Color: 0; 0; 0
       Min Intensity: 47
-      Name: LaserScan
+      Name: LIDAR Scan
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
@@ -181,7 +162,7 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.07000000029802322
       Head Radius: 0.029999999329447746
-      Name: PoseArray
+      Name: AMCL Samples
       Shaft Length: 0.23000000417232513
       Shaft Radius: 0.009999999776482582
       Shape: Arrow (Flat)
@@ -192,18 +173,18 @@ Visualization Manager:
       Class: rviz_default_plugins/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: true
-      Name: Map
+      Enabled: false
+      Name: Costmap (local)
       Topic: /local_costmap/costmap
       Unreliable: false
       Use Timestamp: true
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map
       Color Scheme: costmap
       Draw Behind: false
       Enabled: false
-      Name: Map
+      Name: Costmap (global)
       Topic: /global_costmap/costmap
       Unreliable: false
       Use Timestamp: true
@@ -211,7 +192,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: map
+    Fixed Frame: odom
     Frame Rate: 34
   Name: root
   Tools:
@@ -234,7 +215,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.805903673171997
+      Distance: 67.88916778564453
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -244,15 +225,15 @@ Visualization Manager:
         X: 0
         Y: 0
         Z: 0
-      Focal Shape Fixed Size: false
+      Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5247963666915894
-      Target Frame: base_link
+      Pitch: 0.5097965598106384
+      Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.1522369384765625
+      Yaw: 4.240400791168213
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 67.88916778564453
@@ -288,5 +269,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1502
-  X: 1386
+  X: 1938
   Y: 27
