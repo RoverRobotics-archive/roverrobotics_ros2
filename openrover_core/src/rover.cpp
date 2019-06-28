@@ -253,6 +253,8 @@ void openrover::Rover::update_odom()
 
     // In the odom_frame_id
     odom->pose.covariance.fill(-1.0);
+    // We don't have any odom pose, but rviz complains if the Quat is not normalized
+    odom->pose.pose.orientation.z = 1.0;
 
     // In the odom_child_frame_id
     odom->twist.twist.linear.x = twist[0];
