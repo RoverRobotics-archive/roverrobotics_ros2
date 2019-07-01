@@ -43,9 +43,9 @@ protected:
   bool right_wheel_fwd{};
 
   /// Callback for velocity commands
-  void on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg);
+  void on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg);
   /// Callback for new raw data received
-  void on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data);
+  void on_raw_data(openrover_core_msgs::msg::RawData::ConstSharedPtr data);
   void update_diagnostics();
 
   rclcpp::TimerBase::SharedPtr tmr_diagnostics;

@@ -19,7 +19,6 @@ using RawValue = decltype(RawData::value);
 
 static auto as_uint16(RawValue r) { return ((uint16_t)r[0]) << 8 | (uint16_t)r[1]; }
 static auto as_int16(RawValue r) { return ((int16_t)r[0]) << 8 | (int16_t)r[1]; }
-static auto as_bits(RawValue r) { return std::bitset<16>(as_uint16(r)); }
 
 template <unsigned char N, typename T>
 struct KnownDataElement
@@ -47,7 +46,6 @@ struct UnknownDataElement
     return stream.str();
   }
 };
-
 struct LeftMotorEncoderState : KnownDataElement<14, int16_t>
 {
   static int16_t decode(openrover::data::RawValue r) { return as_int16(r); }
@@ -56,11 +54,15 @@ struct RightMotorEncoderState : KnownDataElement<16, int16_t>
 {
   static int16_t decode(openrover::data::RawValue r) { return as_int16(r); }
 };
+struct MotorTemperature1 : KnownDataElement<20, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) * 1.0; }
+};
+
 // firmware 1.0 : BE CAREFUL reading the firmware code. It's messy and confusing
 // 1:256 prescale with 16MHz base clock = 256 / (16 MHz) = 16 microseconds
 // / 2 to compensate for only counting every *other* commutation
 constexpr auto ENCODER_TIME_BASE = 256.0 / 16.0e6 / 2;
-
 // the time it takes for a single commutation event
 struct LeftMotorEncoderPeriod : KnownDataElement<28, double>
 {
@@ -74,7 +76,18 @@ struct FlipperMotorEncoderPeriod : KnownDataElement<32, double>
 {
   static Value decode(RawValue r) { return as_uint16(r) * ENCODER_TIME_BASE; }
 };
-
+struct BatteryAStateOfCharge : KnownDataElement<34, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) / 100.0; }
+};
+struct BatteryBStateOfCharge : KnownDataElement<36, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) / 100.0; }
+};
+struct BatteryChargingState : KnownDataElement<38, bool>
+{
+  static Value decode(RawValue r) { return as_uint16(r) == 0xdada; }
+};
 struct RoverVersionValue
 {
   int major;
@@ -103,6 +116,51 @@ struct RoverVersion : KnownDataElement<40, RoverVersionValue>
     else
       return { v / 10000, v / 100 % 100, v / 1 % 100 };
   }
+};
+
+enum class MotorStatusFlag
+{
+  /// No flags at all.
+  MOTOR_FLAG_NONE = 0,
+
+  /// Feedback flag: Does motor experience high current? 1 indicates some sort of long-circuit
+  /// condition
+  MOTOR_FLAG_FAULT1 = 1u << 0u,
+
+  /// Feedback flag: Does motor experience low current? 1 indicates some sort of short-circuit
+  /// condition
+  MOTOR_FLAG_FAULT2 = 1u << 1u,
+
+  /// Control flag: Should use fast current decay?
+  /// Fast mode has higher dynamic response but worse for maintaining speed.
+  /// Ignored when coasting or braking.
+  MOTOR_FLAG_DECAY_MODE = 1u << 2u,
+
+  /// Control flag: Should drive motor in reverse direction? (this is the motor direction
+  /// clockwise or counterclockwise,
+  /// NOT forward or backwards w.r.t. the rover's heading)
+  /// Ignored when coasting or braking.
+  MOTOR_FLAG_REVERSE = 1u << 3u,
+
+  /// Control flag: Should brake motor? If enabled, PWM value is ignored.
+  /// Ignored when coasting.
+  MOTOR_FLAG_BRAKE = 1u << 4u,
+
+  /// Control flag: Should coast motor? If enabled, PWM value is ignored.
+  MOTOR_FLAG_COAST = 1u << 5u,
+};
+
+struct LeftMotorStatus : KnownDataElement<72, MotorStatusFlag>
+{
+  static Value decode(RawValue r) { return MotorStatusFlag(as_uint16(r)); }
+};
+struct RightMotorStatus : KnownDataElement<74, MotorStatusFlag>
+{
+  static Value decode(RawValue r) { return MotorStatusFlag(as_uint16(r)); }
+};
+struct FlipperMotorStatus : KnownDataElement<76, MotorStatusFlag>
+{
+  static Value decode(RawValue r) { return MotorStatusFlag(as_uint16(r)); }
 };
 
 }  // namespace data

@@ -1,11 +1,9 @@
 #include <chrono>
-#include <sstream>
 #include <iostream>
 #include <iomanip>
 #include "rover_serial.hpp"
 
 using serial::Serial;
-using std::placeholders::_1;
 using namespace openrover_core_msgs;
 using namespace openrover;
 
@@ -53,30 +51,28 @@ std::vector<uint8_t> depacketize(std::vector<uint8_t> packet)
   return payload;
 }
 
-using Cls = RoverSerial;
-
 RoverSerial::RoverSerial() : Node("rover_serial", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
-  RCLCPP_INFO(this->get_logger(), "Starting rover serial communication node");
+  RCLCPP_INFO(get_logger(), "Starting rover serial communication node");
 
   std::string serial_port = declare_parameter("serial_port", "/dev/ttyUSB0");
 
   motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT);
 
-  keepalive_timer = this->create_wall_timer(keepalive_period, std::bind(&Cls::keepalive_callback, this));
-  read_timer = this->create_wall_timer(uart_poll_period, std::bind(&Cls::read_callback, this));
+  keepalive_timer = create_wall_timer(keepalive_period, [=]() { keepalive_callback(); });
+  read_timer = create_wall_timer(uart_poll_period, [=]() { read_callback(); });
 
   // auto writer_group = this->create_callback_group(rclcpp::callback_group::CallbackGroupType::MutuallyExclusive);
-  kill_motors_timer = this->create_wall_timer(kill_motors_timeout, std::bind(&Cls::on_kill_motors, this));
+  kill_motors_timer = create_wall_timer(kill_motors_timeout, [=]() { on_kill_motors(); });
 
-  pub_raw_data = this->create_publisher<openrover_core_msgs::msg::RawData>("raw_data", rclcpp::QoS(16));
+  pub_raw_data = create_publisher<openrover_core_msgs::msg::RawData>("raw_data", rclcpp::QoS(16));
 
-  sub_motor_efforts = this->create_subscription<msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1),
-                                                                      std::bind(&Cls::on_motor_efforts, this, _1));
-  sub_raw_commands = this->create_subscription<msg::RawCommand>("openrover_command", rclcpp::QoS(16),
-                                                                std::bind(&Cls::on_raw_command, this, _1));
+  sub_motor_efforts = create_subscription<msg::RawMotorCommand>(
+      "motor_efforts", rclcpp::QoS(1), [=](msg::RawMotorCommand::SharedPtr msg) { on_motor_efforts(msg); });
+  sub_raw_commands = create_subscription<msg::RawCommand>("openrover_command", rclcpp::QoS(16),
+                                                          [=](msg::RawCommand::SharedPtr msg) { on_raw_command(msg); });
 
-  RCLCPP_INFO(this->get_logger(), "Connecting to serial: '%s'", serial_port.c_str());
+  RCLCPP_INFO(get_logger(), "Connecting to serial: '%s'", serial_port.c_str());
 
   try
   {

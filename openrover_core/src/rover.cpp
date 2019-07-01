@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cmath>
 #include <chrono>
-#include "tf2/convert.h"
 #include <Eigen/src/Core/Matrix.h>
 #include "data.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
@@ -15,21 +14,20 @@ using geometry_msgs::msg::Twist;
 using geometry_msgs::msg::Vector3;
 using namespace openrover_core_msgs;
 
-using Cls = Rover;
-
 Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
   RCLCPP_INFO(get_logger(), "Starting rover driver node");
 
-  sub_raw_data = create_subscription<msg::RawData>("raw_data", rclcpp::QoS(16), std::bind(&Cls::on_raw_data, this, _1));
-  double diagnostics_frequency = declare_parameter("diagnostics_frequency", 1.0);
-  tmr_diagnostics = create_wall_timer(1s / diagnostics_frequency, std::bind(&Cls::update_diagnostics, this));
+  sub_raw_data = create_subscription<msg::RawData>("raw_data", rclcpp::QoS(32),
+                                                   [=](msg::RawData::ConstSharedPtr msg) { on_raw_data(msg); });
+  double diagnostics_frequency = declare_parameter("diagnostics_frequency", 0.2);
+  tmr_diagnostics = create_wall_timer(1s / diagnostics_frequency, [=]() { update_diagnostics(); });
   double odometry_frequency = declare_parameter("odometry_frequency", 10.0);
-  tmr_odometry = create_wall_timer(1s / odometry_frequency, std::bind(&Cls::update_odom, this));
+  tmr_odometry = create_wall_timer(1s / odometry_frequency, [=]() { update_odom(); });
 
-  sub_cmd_vel =
-      create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1), std::bind(&Cls::on_cmd_vel, this, _1));
-  pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(16));
+  sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1),
+                                                               [=](Twist::ConstSharedPtr msg) { on_cmd_vel(msg); });
+  pub_rover_command = create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(32));
   pub_motor_efforts = create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
   pub_diagnostics = create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", rclcpp::QoS(1));
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom_raw", rclcpp::QoS(4));
@@ -78,7 +76,7 @@ uint8_t to_motor_command(double d)
   return static_cast<uint8_t>(d);
 }
 
-void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
+void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
 {
   // expecting values in the range of +/- linear_top_speed and +/- angular top speed
   auto linear_rate = msg->linear.x;
@@ -113,6 +111,20 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::SharedPtr msg)
 
 void openrover::Rover::update_diagnostics()
 {
+  // Ask the rover to send the next batch of diagnostics data
+  const std::vector<uint8_t> DIAGNOSTIC_DATA_ELEMENTS{
+    data::MotorTemperature1::which(),     data::LeftMotorStatus::which(),      data::RightMotorStatus::which(),
+    data::FlipperMotorStatus::which(),    data::BatteryChargingState::which(), data::BatteryAStateOfCharge::which(),
+    data::BatteryBStateOfCharge::which(),
+  };
+  for (auto which : DIAGNOSTIC_DATA_ELEMENTS)
+  {
+    openrover_core_msgs::msg::RawCommand cmd;
+    cmd.verb = 10;
+    cmd.arg = which;
+    pub_rover_command->publish(cmd);
+  }
+
   auto diagnostics = std::make_unique<diagnostic_msgs::msg::DiagnosticArray>();
   diagnostics->header.stamp = get_clock()->now();
   {
@@ -160,6 +172,45 @@ void openrover::Rover::update_diagnostics()
     }
     diagnostics->status.push_back(encoders_status);
   }
+  {
+    diagnostic_msgs::msg::DiagnosticStatus motors_status;
+    motors_status.hardware_id = "openrover/motors";
+    if (auto data = get_recent<data::MotorTemperature1>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "temperature";
+      kv.value = std::to_string(data->state);
+      motors_status.values.push_back(kv);
+    }
+    diagnostics->status.push_back(motors_status);
+  }
+  {
+    diagnostic_msgs::msg::DiagnosticStatus power_status;
+    power_status.hardware_id = "openrover/power";
+    if (auto data = get_recent<data::BatteryAStateOfCharge>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery A state of charge";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::BatteryBStateOfCharge>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery B state of charge";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::BatteryChargingState>())
+    {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery charging state";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    diagnostics->status.push_back(power_status);
+  }
+
   pub_diagnostics->publish(std::move(diagnostics));
 }
 
@@ -273,7 +324,7 @@ void openrover::Rover::update_odom()
   odom_last_time = now;
 }
 
-void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::SharedPtr data)
+void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::ConstSharedPtr data)
 {
   most_recent_data[data->which] = std::make_unique<Timestamped<data::RawValue>>(get_clock()->now(), data->value);
 }
