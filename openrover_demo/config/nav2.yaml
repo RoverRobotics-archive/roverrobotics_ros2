@@ -114,8 +114,8 @@ global_costmap:
 local_costmap:
   dwb_controller:
     ros__parameters:
-      plugin_names: ["obstacle_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
+      plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
+      plugin_types: ["nav2_costmap_2d::StaticLayer", "nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
       global_frame: map
       always_send_full_costmap: true
       use_sim_time: false
@@ -125,6 +125,8 @@ local_costmap:
       obstacle_layer:
         enabled: True
       observation_sources: scan
+      static_layer:
+        enabled: False
       scan:
         topic: /scan
         max_obstacle_height: 2.0
