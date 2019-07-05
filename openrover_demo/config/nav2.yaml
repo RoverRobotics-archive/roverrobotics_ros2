@@ -114,11 +114,12 @@ global_costmap:
 local_costmap:
   dwb_controller:
     ros__parameters:
-      plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
-      plugin_types: ["nav2_costmap_2d::StaticLayer", "nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
+      plugin_names: ["obstacle_layer", "inflation_layer"]
+      plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
       global_frame: map
       always_send_full_costmap: true
       use_sim_time: false
+      rolling_window: true
       robot_radius: 0.17
       inflation_layer:
         cost_scaling_factor: 3.0
@@ -138,7 +139,6 @@ map_server:
     mode: scale
     use_sim_time: false
     yaml_filename: "/home/snuc/ros2_ws/src/openrover/openrover_demo/maps/map.yaml"
-
 
 lifecycle_manager:
   ros__parameters:
