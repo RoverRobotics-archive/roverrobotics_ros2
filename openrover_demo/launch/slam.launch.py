@@ -25,6 +25,6 @@ def generate_launch_description():
             package='cartographer_ros',
             node_executable='occupancy_grid_node',
             output='screen',
-            arguments=['-resolution', '0.05', '-publish_period_sec', '1.0']
+            arguments=['-resolution', '0.02', '-publish_period_sec', '1.0']
         ),
     ])

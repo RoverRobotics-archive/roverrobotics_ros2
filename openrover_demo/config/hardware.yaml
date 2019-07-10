@@ -16,6 +16,7 @@ rplidar_node:
     frame_id: lidar_link
     inverted: false
     angle_compensate: false
+    scan_mode: Boost
 
 bno055_driver:
   ros__parameters:
