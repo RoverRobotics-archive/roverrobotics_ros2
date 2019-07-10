@@ -1,13 +1,13 @@
 #include "composition.hpp"
 
-#include "rover_serial.hpp"
-#include "rover.hpp"
 #include <string>
+#include "rover.hpp"
+#include "rover_serial.hpp"
 using namespace openrover;
 
 #include "rclcpp/rclcpp.hpp"
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
 

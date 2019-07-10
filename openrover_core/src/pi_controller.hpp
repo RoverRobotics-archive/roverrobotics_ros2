@@ -19,16 +19,18 @@ protected:
   double control_value;
 
 public:
-  PIController(double proportional_gain, double integral_gain, double windup_limit, const rclcpp::Time& time_zero);
+  PIController(
+    double proportional_gain, double integral_gain, double windup_limit,
+    const rclcpp::Time & time_zero);
 
   /// Chooses a new target value that the controller is aiming for
   /// @param new_target the new set point
-  void set_target(double new_target) { target = new_target; };
+  void set_target(double new_target) { target = new_target; }
 
-  /// Drives the controller forward one step. This should be called frequently, with the return value being passed into
-  /// the system being controlled
+  /// Drives the controller forward one step. This should be called frequently,
+  /// with the return value being passed into the system being controlled
   /// @param now The current time
   /// @param measured_value Observed output value during this time period
   /// @return New control value
-  double step(const rclcpp::Time& now, double measured_value);
+  double step(const rclcpp::Time & now, double measured_value);
 };

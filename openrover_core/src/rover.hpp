@@ -1,36 +1,41 @@
 #pragma once
 
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-#include "openrover_core_msgs/msg/raw_motor_command.hpp"
-#include "openrover_core_msgs/msg/raw_data.hpp"
-#include "openrover_core_msgs/msg/raw_command.hpp"
-#include "rclcpp/time.hpp"
+#include <data.hpp>
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
-#include <data.hpp>
-#include "nav_msgs/msg/odometry.hpp"
-#include "timestamped.hpp"
-#include "pi_controller.hpp"
 #include "eigen3/Eigen/Dense"
+#include "geometry_msgs/msg/twist.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "openrover_core_msgs/msg/raw_command.hpp"
+#include "openrover_core_msgs/msg/raw_data.hpp"
+#include "openrover_core_msgs/msg/raw_motor_command.hpp"
+#include "pi_controller.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/time.hpp"
+#include "timestamped.hpp"
 
 namespace openrover
 {
-/// This node supervises a Connection node and translates between low-level commands and high-level commands.
+/// This node supervises a Connection node and translates between low-level
+/// commands and high-level commands.
 class Rover : public rclcpp::Node
 {
 public:
   Rover();
 
 protected:
-  std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>> most_recent_data;
+  std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>>
+    most_recent_data;
 
-  /// Speed (m/s) this rover will attain running its motors at full power forward.
+  /// Speed (m/s) this rover will attain running its motors at full power
+  /// forward.
   double top_speed_linear;
-  /// Rotational speed (rad/s) this rover will attain pushing its motors at full efford in opposite directions
+  /// Rotational speed (rad/s) this rover will attain pushing its motors at full
+  /// efford in opposite directions
   double top_speed_angular;
 
-  /// Describes the relation between the encoder frequencies and the rover velocity
+  /// Describes the relation between the encoder frequencies and the rover
+  /// velocity
   Eigen::Matrix2d encoder_frequency_lr_to_twist_fl;
 
   std::string odom_frame_id;
@@ -71,14 +76,11 @@ protected:
   template <typename T>
   std::unique_ptr<Timestamped<typename T::Value>> get_recent()
   {
-    try
-    {
+    try {
       auto raw = *most_recent_data.at(T::which());
       auto value = T::decode(raw.state);
       return std::make_unique<Timestamped<typename T::Value>>(raw.time, value);
-    }
-    catch (std::out_of_range&)
-    {
+    } catch (std::out_of_range &) {
       return nullptr;
     }
   }

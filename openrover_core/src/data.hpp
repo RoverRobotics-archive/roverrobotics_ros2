@@ -1,18 +1,17 @@
 #pragma once
 
-#include "openrover_core_msgs/msg/raw_data.hpp"
 #include <bitset>
 #include <functional>
 #include <iomanip>
-#include <string>
 #include <sstream>
+#include <string>
 #include "diagnostic_msgs/msg/key_value.hpp"
+#include "openrover_core_msgs/msg/raw_data.hpp"
 
 namespace openrover
 {
 namespace data
 {
-
 using openrover_core_msgs::msg::RawData;
 using std::string;
 using RawValue = decltype(RawData::value);
@@ -95,12 +94,9 @@ struct RoverVersionValue
   int patch;
   std::string to_string() const
   {
-    if (major == 0 && minor == 0 && patch == 0)
-    {
+    if (major == 0 && minor == 0 && patch == 0) {
       return "legacy";
-    }
-    else
-    {
+    } else {
       return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
     }
   }
@@ -111,15 +107,15 @@ struct RoverVersion : KnownDataElement<40, RoverVersionValue>
   static Value decode(RawValue r)
   {
     auto v = as_uint16(r);
-    if (v == 40621)
-      return { 0, 0, 0 };
-    else
-      return { v / 10000, v / 100 % 100, v / 1 % 100 };
+    if (v == 40621) {
+      return {0, 0, 0};
+    } else {
+      return {v / 10000, v / 100 % 100, v / 1 % 100};
+    }
   }
 };
 
-enum class MotorStatusFlag
-{
+enum class MotorStatusFlag {
   /// No flags at all.
   MOTOR_FLAG_NONE = 0,
 
@@ -127,7 +123,7 @@ enum class MotorStatusFlag
   /// condition
   MOTOR_FLAG_FAULT1 = 1u << 0u,
 
-  /// Feedback flag: Does motor experience low current? 1 indicates some sort of short-circuit
+  /// Feedback flag: Does motor experience low current? 1 indicates some sort of  short-circuit
   /// condition
   MOTOR_FLAG_FAULT2 = 1u << 1u,
 
@@ -136,9 +132,8 @@ enum class MotorStatusFlag
   /// Ignored when coasting or braking.
   MOTOR_FLAG_DECAY_MODE = 1u << 2u,
 
-  /// Control flag: Should drive motor in reverse direction? (this is the motor direction
-  /// clockwise or counterclockwise,
-  /// NOT forward or backwards w.r.t. the rover's heading)
+  /// Control flag: Should drive motor in reverse direction? (this is the motor direction clockwise
+  /// or counterclockwise, NOT forward or backwards w.r.t. the rover's heading)
   /// Ignored when coasting or braking.
   MOTOR_FLAG_REVERSE = 1u << 3u,
 
@@ -161,6 +156,14 @@ struct RightMotorStatus : KnownDataElement<74, MotorStatusFlag>
 struct FlipperMotorStatus : KnownDataElement<76, MotorStatusFlag>
 {
   static Value decode(RawValue r) { return MotorStatusFlag(as_uint16(r)); }
+};
+struct CoolingFan1DutyFactor : KnownDataElement<78, float>
+{
+  static Value decode(RawValue r) { return as_uint16(r) / 240.0F; }
+};
+struct CoolingFan2DutyFactor : KnownDataElement<80, float>
+{
+  static Value decode(RawValue r) { return as_uint16(r) / 240.0F; }
 };
 
 }  // namespace data

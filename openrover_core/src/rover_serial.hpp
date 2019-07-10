@@ -1,9 +1,9 @@
 #pragma once
-#include "rclcpp/rclcpp.hpp"
 #include <chrono>
+#include "openrover_core_msgs/msg/raw_command.hpp"
 #include "openrover_core_msgs/msg/raw_data.hpp"
 #include "openrover_core_msgs/msg/raw_motor_command.hpp"
-#include "openrover_core_msgs/msg/raw_command.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "serial/serial.h"  //< yes, this is a cpp header
 
 using namespace openrover_core_msgs;
@@ -15,7 +15,8 @@ namespace openrover
 const uint8_t UART_START_PACKET = 253;
 const unsigned long BAUDRATE = 57600;
 
-/// Responsible for managing the serial connection and communicating with the rover.
+/// Responsible for managing the serial connection and communicating with the
+/// rover.
 class RoverSerial : public rclcpp::Node
 {
 public:
@@ -52,7 +53,7 @@ protected:
 class OpenRoverError : public std::runtime_error
 {
 public:
-  OpenRoverError(const char* msg) : std::runtime_error(msg) {}
+  OpenRoverError(const char * msg) : std::runtime_error(msg) {}
   OpenRoverError(const std::string msg) : std::runtime_error(msg) {}
 };
 }  // namespace openrover
