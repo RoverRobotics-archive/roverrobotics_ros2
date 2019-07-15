@@ -5,6 +5,6 @@
 # to use this file, sudo cp it into
 # sudo cp install/share/openrover_demo/config/openrover.rules /etc/udev/rules.d/10-openrover.rules && sudo udevadm control --reload-rules && udevadm trigger
 
-ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="lidar"
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="lidar"
+KERNEL=="ttyUSB*", ATTRS{idProduct}=="6001", ATTRS{idVendor}=="0403", SYMLINK+="imu"
 SUBSYSTEM=="tty", ATTRS{serial}=="DM3U53QW", SYMLINK+="rover"
-SUBSYSTEM=="tty", ATTRS{serial}=="FTA40RFD", SYMLINK+="imu"
