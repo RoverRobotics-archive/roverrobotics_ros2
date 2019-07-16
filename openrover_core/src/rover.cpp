@@ -60,9 +60,9 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
     meters_per_encoder_sum,  //
     -radians_per_encoder_difference, +radians_per_encoder_difference;
 
-  auto pi_p = declare_parameter("motor_control_gain_p", 0.0001);
-  auto pi_i = declare_parameter("motor_control_gain_i", 0.01);
-  auto pi_windup = declare_parameter("motor_control_windup", 10);
+  auto pi_p = declare_parameter("motor_control_gain_p", 0.0005);
+  auto pi_i = declare_parameter("motor_control_gain_i", 0.004);
+  auto pi_windup = declare_parameter("motor_control_windup", 100.0);
   auto now = get_clock()->now();
 
   left_motor_controller = std::make_unique<PIController>(pi_p, pi_i, pi_windup, now);

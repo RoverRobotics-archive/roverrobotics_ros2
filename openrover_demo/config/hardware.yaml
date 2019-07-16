@@ -8,6 +8,9 @@ rover:
     odometry_frequency: 15.0
     meters_per_encoder_sum: 0.00067390542
     radians_per_encoder_difference: 0.0037130276
+    motor_control_gain_p: 0.0005
+    motor_control_gain_i: 0.004
+    motor_control_windup: 100.0
 
 rplidar_node:
   ros__parameters:
