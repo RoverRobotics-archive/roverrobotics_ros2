@@ -128,8 +128,9 @@ void openrover::Rover::update_diagnostics()
     data::RightMotorStatus::which(),      data::FlipperMotorStatus::which(),
     data::BatteryChargingState::which(),  data::BatteryAStateOfCharge::which(),
     data::BatteryBStateOfCharge::which(), data::CoolingFan1DutyFactor::which(),
-    data::CoolingFan2DutyFactor::which(),
-  };
+    data::CoolingFan2DutyFactor::which(),  data::BatteryACurrent::which(),
+    data::BatteryBCurrent::which(),        data::BatteryACurrentInternal::which(),
+    data::BatteryBCurrentInternal::which()};
   for (auto which : DIAGNOSTIC_DATA_ELEMENTS) {
     openrover_core_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
@@ -214,6 +215,30 @@ void openrover::Rover::update_diagnostics()
     if (auto data = get_recent<data::BatteryBStateOfCharge>()) {
       diagnostic_msgs::msg::KeyValue kv;
       kv.key = "battery B state of charge";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::BatteryACurrent>()) {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery A current";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::BatteryBCurrent>()) {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery B current";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::BatteryACurrentInternal>()) {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery A current (internal)";
+      kv.value = std::to_string(data->state);
+      power_status.values.push_back(kv);
+    }
+    if (auto data = get_recent<data::BatteryBCurrentInternal>()) {
+      diagnostic_msgs::msg::KeyValue kv;
+      kv.key = "battery B current (internal)";
       kv.value = std::to_string(data->state);
       power_status.values.push_back(kv);
     }

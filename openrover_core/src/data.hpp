@@ -16,8 +16,8 @@ using openrover_core_msgs::msg::RawData;
 using std::string;
 using RawValue = decltype(RawData::value);
 
-static auto as_uint16(RawValue r) { return ((uint16_t)r[0]) << 8 | (uint16_t)r[1]; }
-static auto as_int16(RawValue r) { return ((int16_t)r[0]) << 8 | (int16_t)r[1]; }
+static auto as_uint16(RawValue r) { return (uint16_t)(r[0] << 8 | r[1]); }
+static auto as_int16(RawValue r) { return (int16_t)(r[0] << 8 | r[1]); }
 
 template <unsigned char N, typename T>
 struct KnownDataElement
@@ -113,6 +113,23 @@ struct RoverVersion : KnownDataElement<40, RoverVersionValue>
       return {v / 10000, v / 100 % 100, v / 1 % 100};
     }
   }
+};
+
+struct BatteryACurrent : KnownDataElement<42, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) / 34.0; }
+};
+struct BatteryBCurrent : KnownDataElement<44, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) / 34.0; }
+};
+struct BatteryACurrentInternal : KnownDataElement<68, double>
+{
+  static Value decode(RawValue r) { return as_int16(r) / 1000.0; }
+};
+struct BatteryBCurrentInternal : KnownDataElement<70, double>
+{
+  static Value decode(RawValue r) { return as_int16(r) / 1000.0; }
 };
 
 enum class MotorStatusFlag {
