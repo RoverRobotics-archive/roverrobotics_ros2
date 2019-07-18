@@ -27,7 +27,7 @@ bno055_driver:
     frame_id: imu_link
     frequency: 30.0
     self_manage: true
-    use_magnetometer: false
+    use_magnetometer: true
 
     angular_velocity_stdev: 0.01
     linear_acceleration_stdev: 0.0015
