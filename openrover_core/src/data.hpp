@@ -57,6 +57,10 @@ struct MotorTemperature1 : KnownDataElement<20, double>
 {
   static Value decode(RawValue r) { return as_uint16(r) * 1.0; }
 };
+struct MotorTemperature2 : KnownDataElement<22, double>
+{
+  static Value decode(RawValue r) { return as_uint16(r) * 1.0; }
+};
 
 // firmware 1.0 : BE CAREFUL reading the firmware code. It's messy and confusing
 // 1:256 prescale with 16MHz base clock = 256 / (16 MHz) = 16 microseconds

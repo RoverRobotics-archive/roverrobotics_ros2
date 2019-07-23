@@ -20,8 +20,7 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
 
   sub_raw_data = create_subscription<msg::RawData>(
     "raw_data", rclcpp::QoS(32), [=](msg::RawData::ConstSharedPtr msg) { on_raw_data(msg); });
-  double diagnostics_frequency = declare_parameter("diagnostics_frequency", 0.2);
-  tmr_diagnostics = create_wall_timer(1s / diagnostics_frequency, [=]() { update_diagnostics(); });
+
   double odometry_frequency = declare_parameter("odometry_frequency", 10.0);
   tmr_odometry = create_wall_timer(1s / odometry_frequency, [=]() { update_odom(); });
 
@@ -31,9 +30,16 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
     create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(32));
   pub_motor_efforts =
     create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
-  pub_diagnostics =
-    create_publisher<diagnostic_msgs::msg::DiagnosticArray>("diagnostics", rclcpp::QoS(1));
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom_raw", rclcpp::QoS(4));
+
+  double diagnostics_frequency = declare_parameter("diagnostics_frequency", 0.2);
+  updater = std::make_shared<diagnostic_updater::Updater>(create_sub_node("diagnostic_updater"));
+  updater->setHardwareID("OpenRover");
+  updater->add("power", [this](auto & t) { update_power_diagnostics(t); });
+  updater->add("firmware", [this](auto & t) { update_firmware_diagnostics(t); });
+  updater->add("drive", [this](auto & t) { update_drive_diagnostics(t); });
+
+  tmr_diagnostics = create_wall_timer(1s / diagnostics_frequency, [this]() { updater->update(); });
 
   // based on the physical capabilities of the rover. Depends on the wheel
   // configuration (2wd/4wd/treads) and terrain
@@ -118,140 +124,6 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
   right_motor_controller->set_target(r_motor);
 
   RCLCPP_DEBUG(get_logger(), "Updated target motor speeds %f %f", l_motor, r_motor);
-}
-
-void openrover::Rover::update_diagnostics()
-{
-  // Ask the rover to send the next batch of diagnostics data
-  const std::vector<uint8_t> DIAGNOSTIC_DATA_ELEMENTS{
-    data::MotorTemperature1::which(),     data::LeftMotorStatus::which(),
-    data::RightMotorStatus::which(),      data::FlipperMotorStatus::which(),
-    data::BatteryChargingState::which(),  data::BatteryAStateOfCharge::which(),
-    data::BatteryBStateOfCharge::which(), data::CoolingFan1DutyFactor::which(),
-    data::CoolingFan2DutyFactor::which(),  data::BatteryACurrent::which(),
-    data::BatteryBCurrent::which(),        data::BatteryACurrentInternal::which(),
-    data::BatteryBCurrentInternal::which()};
-  for (auto which : DIAGNOSTIC_DATA_ELEMENTS) {
-    openrover_core_msgs::msg::RawCommand cmd;
-    cmd.verb = 10;
-    cmd.arg = which;
-    pub_rover_command->publish(cmd);
-  }
-
-  auto diagnostics = std::make_unique<diagnostic_msgs::msg::DiagnosticArray>();
-  diagnostics->header.stamp = get_clock()->now();
-  {
-    diagnostic_msgs::msg::DiagnosticStatus rover_status;
-    rover_status.hardware_id = "openrover";
-    if (auto v = get_recent<data::RoverVersion>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "firmware revision";
-      kv.value = v->state.to_string();
-      rover_status.values.push_back(kv);
-    }
-    diagnostics->status.push_back(rover_status);
-  }
-  {
-    diagnostic_msgs::msg::DiagnosticStatus encoders_status;
-    encoders_status.hardware_id = "openrover/motor encoders";
-    if (auto data = get_recent<data::LeftMotorEncoderState>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "left position";
-      kv.value = std::to_string(data->state);
-      encoders_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::RightMotorEncoderState>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "right position";
-      kv.value = std::to_string(data->state);
-      encoders_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::LeftMotorEncoderPeriod>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "left period";
-      kv.value = std::to_string(data->state);
-      encoders_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::RightMotorEncoderPeriod>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "right period";
-      kv.value = std::to_string(data->state);
-      encoders_status.values.push_back(kv);
-    }
-    diagnostics->status.push_back(encoders_status);
-  }
-  {
-    diagnostic_msgs::msg::DiagnosticStatus motors_status;
-    motors_status.hardware_id = "openrover/motors";
-    if (auto data = get_recent<data::MotorTemperature1>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "temperature";
-      kv.value = std::to_string(data->state);
-      motors_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::CoolingFan1DutyFactor>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "cooling fan 1 duty factor";
-      kv.value = std::to_string(data->state);
-      motors_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::CoolingFan2DutyFactor>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "cooling fan 2 duty factor";
-      kv.value = std::to_string(data->state);
-      motors_status.values.push_back(kv);
-    }
-    diagnostics->status.push_back(motors_status);
-  }
-  {
-    diagnostic_msgs::msg::DiagnosticStatus power_status;
-    power_status.hardware_id = "openrover/power";
-    if (auto data = get_recent<data::BatteryAStateOfCharge>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery A state of charge";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::BatteryBStateOfCharge>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery B state of charge";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::BatteryACurrent>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery A current";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::BatteryBCurrent>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery B current";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::BatteryACurrentInternal>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery A current (internal)";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::BatteryBCurrentInternal>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery B current (internal)";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    if (auto data = get_recent<data::BatteryChargingState>()) {
-      diagnostic_msgs::msg::KeyValue kv;
-      kv.key = "battery charging state";
-      kv.value = std::to_string(data->state);
-      power_status.values.push_back(kv);
-    }
-    diagnostics->status.push_back(power_status);
-  }
-
-  pub_diagnostics->publish(std::move(diagnostics));
 }
 
 void openrover::Rover::update_odom()
@@ -370,4 +242,126 @@ void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::ConstShare
 {
   most_recent_data[data->which] =
     std::make_unique<Timestamped<data::RawValue>>(get_clock()->now(), data->value);
+}
+
+void Rover::update_power_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status)
+{
+  // request the data for next time we call
+  for (auto which : {data::BatteryChargingState::which(), data::BatteryAStateOfCharge::which(),
+                     data::BatteryBStateOfCharge::which(), data::BatteryACurrent::which(),
+                     data::BatteryBCurrent::which(), data::BatteryACurrentInternal::which(),
+                     data::BatteryBCurrentInternal::which()}) {
+    openrover_core_msgs::msg::RawCommand cmd;
+    cmd.verb = 10;
+    cmd.arg = which;
+    pub_rover_command->publish(cmd);
+  }
+
+  status.clearSummary();
+
+  if (auto data = get_recent<data::BatteryAStateOfCharge>()) {
+    status.add("battery A state of charge", data->state);
+    if (data->state < 0.1) {
+      status.mergeSummary(
+        diagnostic_updater::DiagnosticStatusWrapper::WARN, "Battery A is low on charge");
+    }
+  }
+  if (auto data = get_recent<data::BatteryBStateOfCharge>()) {
+    status.add("battery B state of charge", data->state);
+    if (data->state < 0.1) {
+      status.mergeSummary(
+        diagnostic_updater::DiagnosticStatusWrapper::WARN, "Battery B is low on charge");
+    }
+  }
+  if (auto data = get_recent<data::BatteryACurrent>()) {
+    status.add("battery A current", data->state);
+  }
+  if (auto data = get_recent<data::BatteryBCurrent>()) {
+    status.add("battery B current", data->state);
+  }
+  if (auto data = get_recent<data::BatteryACurrentInternal>()) {
+    status.add("battery A current (internal)", data->state);
+    if (data->state < -9.9) {
+      status.mergeSummary(
+        diagnostic_updater::DiagnosticStatusWrapper::WARN, "Battery A is drawing high current");
+    }
+  }
+  if (auto data = get_recent<data::BatteryBCurrentInternal>()) {
+    status.add("battery B current (internal)", data->state);
+    if (data->state < -9.9) {
+      status.mergeSummary(
+        diagnostic_updater::DiagnosticStatusWrapper::WARN, "Battery B is drawing high current");
+    }
+  }
+  if (auto data = get_recent<data::BatteryChargingState>()) {
+    status.add("battery charging state", data->state);
+  }
+
+  if (status.message.empty()) status.message = "Okay";
+}
+
+void Rover::update_firmware_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status)
+{
+  openrover_core_msgs::msg::RawCommand cmd;
+  cmd.verb = 10;
+  cmd.arg = data::RoverVersion::which();
+  pub_rover_command->publish(cmd);
+
+  status.clearSummary();
+
+  if (auto data = get_recent<data::RoverVersion>()) {
+    status.add("firmware revision", data->state.to_string());
+  } else {
+    status.mergeSummary(
+      diagnostic_updater::DiagnosticStatusWrapper::ERROR, "Could not get firmware version");
+  }
+
+  if (status.message.empty()) status.message = "Okay";
+}
+void Rover::update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status)
+{
+  // Ask the rover to send the next batch of diagnostics data
+  for (auto which : {data::MotorTemperature1::which(), data::LeftMotorStatus::which(),
+                     data::RightMotorStatus::which(), data::FlipperMotorStatus::which(),
+                     data::CoolingFan1DutyFactor::which(), data::CoolingFan2DutyFactor::which()}) {
+    openrover_core_msgs::msg::RawCommand cmd;
+    cmd.verb = 10;
+    cmd.arg = which;
+    pub_rover_command->publish(cmd);
+  }
+
+  status.clearSummary();
+
+  if (auto data = get_recent<data::LeftMotorEncoderState>()) {
+    status.add("left encoder displacement", data->state);
+  }
+  if (auto data = get_recent<data::RightMotorEncoderState>()) {
+    status.add("right encoder displacement", data->state);
+  }
+  if (auto data = get_recent<data::LeftMotorEncoderPeriod>()) {
+    status.add("left encoder period", data->state);
+  }
+  if (auto data = get_recent<data::RightMotorEncoderPeriod>()) {
+    status.add("right encoder period", data->state);
+  }
+  if (auto data = get_recent<data::MotorTemperature1>()) {
+    status.add("left motor temperature", data->state);
+    if (data->state > 50.0)
+      status.mergeSummary(
+        diagnostic_updater::DiagnosticStatusWrapper::WARN, "left motor is too hot");
+  }
+  if (auto data = get_recent<data::MotorTemperature2>()) {
+    status.add("right motor temperature", data->state);
+    if (data->state > 50.0)
+      status.mergeSummary(
+        diagnostic_updater::DiagnosticStatusWrapper::WARN, "right motor is too hot");
+  }
+  if (auto data = get_recent<data::CoolingFan1DutyFactor>()) {
+    status.add("cooling fan 1 duty factor", data->state);
+  }
+  if (auto data = get_recent<data::CoolingFan2DutyFactor>()) {
+    status.add("cooling fan 2 duty factor", data->state);
+  }
+
+  if (status.message.empty()) status.message = "Okay";
 }

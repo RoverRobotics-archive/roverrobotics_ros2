@@ -17,9 +17,9 @@ find_package(std_msgs REQUIRED)
 find_package(serial REQUIRED)
 find_package(openrover_core_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(diagnostic_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(diagnostic_updater REQUIRED)
 
 include_directories(include/ src/)
 file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
@@ -43,9 +43,10 @@ ament_target_dependencies(rover
   serial
   geometry_msgs
   openrover_core_msgs
-  diagnostic_msgs
   nav_msgs
-  tf2_geometry_msgs)
+  tf2_geometry_msgs
+  diagnostic_updater
+  )
 
 install(TARGETS
   rover

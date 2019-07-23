@@ -1,8 +1,7 @@
 #pragma once
 
 #include <data.hpp>
-#include "diagnostic_msgs/msg/diagnostic_array.hpp"
-#include "diagnostic_msgs/msg/key_value.hpp"
+#include "diagnostic_updater/diagnostic_updater.hpp"
 #include "eigen3/Eigen/Dense"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
@@ -51,16 +50,18 @@ protected:
   void on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg);
   /// Callback for new raw data received
   void on_raw_data(openrover_core_msgs::msg::RawData::ConstSharedPtr data);
-  void update_diagnostics();
+
+  void update_firmware_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
+  void update_power_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
+  void update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
+
+  std::shared_ptr<diagnostic_updater::Updater> updater;
 
   rclcpp::TimerBase::SharedPtr tmr_diagnostics;
 
   rclcpp::Time odom_last_time;
   data::LeftMotorEncoderState::Value odom_last_encoder_position_left;
   data::RightMotorEncoderState::Value odom_last_encoder_position_right;
-  std::shared_ptr<std::vector<diagnostic_msgs::msg::KeyValue>> pending_diagnostics;
-  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub_diagnostics;
-
   rclcpp::TimerBase::SharedPtr tmr_odometry;
   void update_odom();
 
