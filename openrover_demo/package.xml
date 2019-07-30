@@ -29,6 +29,9 @@
     <exec_depend>bno055_driver</exec_depend>
     <exec_depend>rplidar_ros</exec_depend>
 
+    <!-- for sensor fusion -->
+    <exec_depend>robot_localization</exec_depend>
+
     <!-- for keyboard teleop -->
     <exec_depend>keystroke</exec_depend>
 
