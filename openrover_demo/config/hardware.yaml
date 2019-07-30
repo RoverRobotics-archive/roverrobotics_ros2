@@ -18,7 +18,7 @@ rplidar_node:
     serial_baudrate: 115200
     frame_id: lidar_link
     inverted: false
-    angle_compensate: false
+    angle_compensate: true
     scan_mode: Boost
 
 bno055_driver:
