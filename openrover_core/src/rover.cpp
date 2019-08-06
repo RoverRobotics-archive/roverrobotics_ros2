@@ -183,8 +183,8 @@ void openrover::Rover::update_odom()
     // the wheel
   } else {
     encoder_frequency_lr = {
-      (left_encoder_position->state - odom_last_encoder_position_left) / dt,
-      (right_encoder_position->state - odom_last_encoder_position_right) / dt};
+      int16_t(left_encoder_position->state - odom_last_encoder_position_left) / dt,
+      int16_t(right_encoder_position->state - odom_last_encoder_position_right) / dt};
     // ^ remember these values are signed. But taking the difference a-b as
     // signed ints will give either a-b or 1<<16 - a-b, whichever has the lower
     // absolute value. This is exactly what we want.
