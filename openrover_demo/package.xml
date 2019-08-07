@@ -46,6 +46,8 @@
     <exec_depend>nav2_dwb_controller</exec_depend>
     <exec_depend>nav2_navfn_planner</exec_depend>
     <exec_depend>nav2_bt_navigator</exec_depend>
+    <exec_depend>nav2_recoveries</exec_depend>
+
 
     <export>
         <build_type>ament_cmake</build_type>

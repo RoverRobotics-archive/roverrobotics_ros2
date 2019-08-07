@@ -69,9 +69,9 @@ def generate_launch_description():
             parameters=[nav2_yaml]
         ),
         launch_ros.actions.Node(
-            node_name='motion_primitives_node',
-            package='nav2_motion_primitives',
-            node_executable='motion_primitives_node',
+            node_name='recoveries_node',
+            package='nav2_recoveries',
+            node_executable='recoveries_node',
             output='screen',
             parameters=[nav2_yaml]
         ),
@@ -84,8 +84,7 @@ def generate_launch_description():
                 nav2_yaml,
                 {
                     'autostart': True,
-                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller', 'navfn_planner',
-                                   'bt_navigator'],
+                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller', 'navfn_planner', 'bt_navigator'],
                 }
             ]
         ),

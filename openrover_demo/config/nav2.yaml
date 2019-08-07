@@ -50,7 +50,7 @@ amcl_rclcpp_node:
 bt_navigator:
   ros__parameters:
     use_sim_time: false
-    bt_xml_filename: /home/snuc/ros2_ws/src/navigation2/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml
+    bt_xml_filename: /home/dan/ros2_ws/src/navigation2/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml
     #/home/snuc/ros2_ws/src/navigation2/nav2_bt_navigator/behavior_trees/navigate_w_replanning.xml
 #"bt_navigator.xml"
 # 'navigate_w_recovery_retry.xml'
@@ -138,7 +138,7 @@ map_server:
   ros__parameters:
     mode: scale
     use_sim_time: false
-    yaml_filename: "/home/snuc/ros2_ws/src/openrover/openrover_demo/maps/map.yaml"
+    yaml_filename: "/home/dan/ros2_ws/src/openrover/openrover_demo/maps/map.yaml"
 
 lifecycle_manager:
   ros__parameters:
