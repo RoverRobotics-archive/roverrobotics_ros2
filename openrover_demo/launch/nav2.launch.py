@@ -21,8 +21,13 @@ from launch import LaunchDescription
 
 
 def generate_launch_description():
-    nav2_yaml = Path(get_package_share_directory('openrover_demo'), 'config', 'nav2.yaml')
+    config = Path(get_package_share_directory('openrover_demo'), 'config')
+    nav2_yaml = config / 'nav2.yaml'
     assert nav2_yaml.is_file()
+    bt_xml_path = config / 'navigate.xml'
+    assert bt_xml_path.is_file()
+    map_yaml_filename = config / 'map.yaml'
+    assert map_yaml_filename.is_file()
 
     return LaunchDescription([
         launch.actions.SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
@@ -31,7 +36,7 @@ def generate_launch_description():
             package='nav2_map_server',
             node_executable='map_server',
             output='screen',
-            parameters=[nav2_yaml]
+            parameters=[nav2_yaml, {'yaml_filename': map_yaml_filename}]
         ),
         launch_ros.actions.LifecycleNode(
             node_name='amcl',
@@ -66,7 +71,7 @@ def generate_launch_description():
             package='nav2_bt_navigator',
             node_executable='bt_navigator',
             output='screen',
-            parameters=[nav2_yaml]
+            parameters=[nav2_yaml, {'bt_xml_filename': str(bt_xml_path.absolute())}],
         ),
         launch_ros.actions.Node(
             node_name='recoveries_node',
