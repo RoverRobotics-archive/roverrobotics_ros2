@@ -36,7 +36,7 @@ def generate_launch_description():
             package='nav2_map_server',
             node_executable='map_server',
             output='screen',
-            parameters=[nav2_yaml, {'yaml_filename': map_yaml_filename}]
+            parameters=[nav2_yaml, {'yaml_filename': str(map_yaml_filename)}]
         ),
         launch_ros.actions.LifecycleNode(
             node_name='amcl',
@@ -71,7 +71,7 @@ def generate_launch_description():
             package='nav2_bt_navigator',
             node_executable='bt_navigator',
             output='screen',
-            parameters=[nav2_yaml, {'bt_xml_filename': str(bt_xml_path.absolute())}],
+            parameters=[nav2_yaml, {'bt_xml_filename': str(bt_xml_path)}],
         ),
         launch_ros.actions.Node(
             node_name='recoveries_node',
