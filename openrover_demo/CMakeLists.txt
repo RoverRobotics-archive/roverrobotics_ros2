@@ -8,7 +8,6 @@ install(DIRECTORY
   config
   meshes
   urdf
-  maps
   DESTINATION share/${PROJECT_NAME})
 
 install(PROGRAMS
