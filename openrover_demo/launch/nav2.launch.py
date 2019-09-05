@@ -31,6 +31,20 @@ def generate_launch_description():
 
     return LaunchDescription([
         launch.actions.SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        launch_ros.actions.Node(
+            node_name='lifecycle_manager',
+            package='nav2_lifecycle_manager',
+            node_executable='lifecycle_manager',
+            output='screen',
+            parameters=[
+                nav2_yaml,
+                {
+                    'autostart': True,
+                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller',
+                                   'navfn_planner', 'bt_navigator'],
+                }
+            ]
+        ),
         launch_ros.actions.LifecycleNode(
             node_name='map_server',
             package='nav2_map_server',
@@ -79,18 +93,5 @@ def generate_launch_description():
             node_executable='recoveries_node',
             output='screen',
             parameters=[nav2_yaml]
-        ),
-        launch_ros.actions.Node(
-            node_name='lifecycle_manager',
-            package='nav2_lifecycle_manager',
-            node_executable='lifecycle_manager',
-            output='screen',
-            parameters=[
-                nav2_yaml,
-                {
-                    'autostart': True,
-                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller', 'navfn_planner', 'bt_navigator'],
-                }
-            ]
         ),
     ])
