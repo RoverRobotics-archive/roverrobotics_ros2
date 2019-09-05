@@ -57,8 +57,6 @@ protected:
 
   std::shared_ptr<diagnostic_updater::Updater> updater;
 
-  rclcpp::TimerBase::SharedPtr tmr_diagnostics;
-
   rclcpp::Time odom_last_time;
   data::LeftMotorEncoderState::Value odom_last_encoder_position_left;
   data::RightMotorEncoderState::Value odom_last_encoder_position_right;

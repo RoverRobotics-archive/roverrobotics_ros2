@@ -33,13 +33,12 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom_raw", rclcpp::QoS(4));
 
   double diagnostics_frequency = declare_parameter("diagnostics_frequency", 0.2);
-  updater = std::make_shared<diagnostic_updater::Updater>(create_sub_node("diagnostic_updater"));
+  updater = std::make_shared<diagnostic_updater::Updater>(
+    create_sub_node("diagnostic_updater"), 1.0 / diagnostics_frequency);
   updater->setHardwareID("OpenRover");
   updater->add("power", [this](auto & t) { update_power_diagnostics(t); });
   updater->add("firmware", [this](auto & t) { update_firmware_diagnostics(t); });
   updater->add("drive", [this](auto & t) { update_drive_diagnostics(t); });
-
-  tmr_diagnostics = create_wall_timer(1s / diagnostics_frequency, [this]() { updater->update(); });
 
   // based on the physical capabilities of the rover. Depends on the wheel
   // configuration (2wd/4wd/treads) and terrain
