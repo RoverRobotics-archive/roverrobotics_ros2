@@ -40,8 +40,8 @@ def generate_launch_description():
                 nav2_yaml,
                 {
                     'autostart': True,
-                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller',
-                                   'navfn_planner', 'bt_navigator'],
+                    'node_names': ['map_server', 'amcl', 'dwb_controller',
+                                   'planner_server', 'bt_navigator'],
                 }
             ]
         ),
@@ -60,13 +60,6 @@ def generate_launch_description():
             parameters=[nav2_yaml],
         ),
         launch_ros.actions.LifecycleNode(
-            node_name='world_model',
-            package='nav2_world_model',
-            node_executable='world_model',
-            output='screen',
-            parameters=[nav2_yaml]
-        ),
-        launch_ros.actions.LifecycleNode(
             node_name='dwb_controller',
             package='dwb_controller',
             node_executable='dwb_controller',
@@ -74,9 +67,9 @@ def generate_launch_description():
             parameters=[nav2_yaml],
         ),
         launch_ros.actions.LifecycleNode(
-            node_name='navfn_planner',
-            package='nav2_navfn_planner',
-            node_executable='navfn_planner',
+            node_name='planner_server',
+            package='nav2_planner',
+            node_executable='planner_server',
             output='screen',
             parameters=[nav2_yaml]
         ),
