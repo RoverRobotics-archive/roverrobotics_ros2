@@ -46,8 +46,9 @@ void PIController::set_target(double new_target) {
   // Assuming near-proportionality, this stabilizes the filter with a changing target.
   // This term means if we negate the direction, we negate the integrated error.
   // and if we halve the speed, we halve the integrated error.
-  if (abs(target) <= EPSILON) {
+  if (abs(target) > 0 && abs(target) <= EPSILON) {
     error_integral *= new_target / target;
   }
+
   target = new_target;
 }

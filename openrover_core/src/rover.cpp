@@ -115,10 +115,6 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
   auto l_motor = encoder_target_freqs[0];
   auto r_motor = encoder_target_freqs[1];
 
-  // save off wheel direction for odometry purposes
-  left_wheel_fwd = (l_motor >= 0);
-  right_wheel_fwd = (r_motor >= 0);
-
   left_motor_controller->set_target(l_motor);
   right_motor_controller->set_target(r_motor);
 
@@ -193,6 +189,10 @@ void openrover::Rover::update_odom()
   {
     auto l_effort = left_motor_controller->step(now, encoder_frequency_lr[0]);
     auto r_effort = right_motor_controller->step(now, encoder_frequency_lr[1]);
+
+    // Assumes direction of effort as the direction of next wheel rotation
+    left_wheel_fwd = (l_effort >= 0);
+    right_wheel_fwd = (r_effort >= 0);
 
     openrover_core_msgs::msg::RawMotorCommand e;
     e.left = to_motor_command(l_effort);
