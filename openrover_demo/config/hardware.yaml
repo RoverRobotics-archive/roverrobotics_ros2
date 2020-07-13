@@ -8,37 +8,9 @@ rover:
     odometry_frequency: 15.0
     meters_per_encoder_sum: 0.00067390542
     radians_per_encoder_difference: 0.0037130276
-    motor_control_gain_p: 0.0005
-    motor_control_gain_i: 0.004
+    motor_control_gain_p: 0.0001
+    motor_control_gain_i: 0.001
     motor_control_windup: 100.0
-
-rplidar_node:
-  ros__parameters:
-    serial_port: /dev/lidar
-    serial_baudrate: 115200
-    frame_id: lidar_link
-    inverted: false
-    angle_compensate: true
-    scan_mode: Boost
-
-bno055_driver:
-  ros__parameters:
-    port: /dev/imu
-    frame_id: imu_link
-    frequency: 30.0
-    self_manage: true
-    use_magnetometer: true
-
-    angular_velocity_stdev: 0.01
-    linear_acceleration_stdev: 0.0015
-    magnetic_field_stdev: 0.0000005
-    orientation_stdev: 0.000001
-    # these calibration values need to be determined on a per-device basis.
-    calibration/accelerometer_offset: [-7, -34, -47]
-    calibration/magnetometer_offset: [275, -193, -104]
-    calibration/gyroscope_offset: [-3, -3, -1]
-    calibration/accelerometer_radius: 1000
-    calibration/magnetometer_radius: 842
 
 joint_state_publisher:
   ros__parameters:

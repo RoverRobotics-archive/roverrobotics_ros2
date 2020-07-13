@@ -24,31 +24,7 @@
     <!-- for visualizing robot data -->
     <exec_depend>rviz2</exec_depend>
 
-    <!-- for interfacing with hardware -->
-    <exec_depend>openrover_core</exec_depend>
-    <exec_depend>bno055_driver</exec_depend>
-    <exec_depend>rplidar_ros</exec_depend>
-
-    <!-- for sensor fusion -->
-    <exec_depend>robot_localization</exec_depend>
-
-    <!-- for keyboard teleop -->
-    <exec_depend>keystroke</exec_depend>
-
-    <!-- for generating maps -->
-    <exec_depend>cartographer_ros</exec_depend>
-
-    <!-- navigation2 stack, for path planning and execution -->
-    <exec_depend>nav2_map_server</exec_depend>
-    <exec_depend>nav2_behavior_tree</exec_depend>
-    <exec_depend>nav2_amcl</exec_depend>
-    <exec_depend>nav2_world_model</exec_depend>
-    <exec_depend>nav2_dwb_controller</exec_depend>
-    <exec_depend>nav2_navfn_planner</exec_depend>
-    <exec_depend>nav2_bt_navigator</exec_depend>
-    <exec_depend>nav2_recoveries</exec_depend>
-    <exec_depend>nav2_lifecycle_manager</exec_depend>
-
+    <exec_depend>openrover_joy_mapper</exec_depend>
 
     <export>
         <build_type>ament_cmake</build_type>

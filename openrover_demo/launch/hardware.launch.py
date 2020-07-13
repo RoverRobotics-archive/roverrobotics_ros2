@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import SetEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch_ros.actions import Node
 
 
@@ -23,23 +23,5 @@ def generate_launch_description():
         Node(
             package='openrover_core', node_executable='rover', output='screen',
             parameters=[hardware_config]
-        ),
-        Node(
-            package='bno055_driver',
-            node_executable='bno055_driver',
-            output='screen',
-            parameters=[hardware_config]
-        ),
-        Node(
-            package='rplidar_ros',
-            node_executable='rplidarNode',
-            output='screen',
-            parameters=[hardware_config],
-        ),
-        # todo: this publishes static positions for wheel. Switch to publishing wheel position
-        # based on encoder data
-        Node(
-            package='joint_state_publisher', node_executable='joint_state_publisher',
-            output='screen', arguments=[str(urdf)], parameters=[hardware_config]
-        ),
+        )
     ])
