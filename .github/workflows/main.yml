@@ -1,18 +1,14 @@
 name: "Test action-ros-ci"
 on: push
-env:
-  ROS_DISTRO: dashing
 jobs:
   build:
     strategy:
       matrix:
         ros-distro: [dashing]
-        include:
-          - image: ros:dashing-ros-base
     runs-on: ubuntu-latest
-    # doesn't work!
-    # container: ros:${{env.ros-distro}}-ros-base
-    container: ${{matrix.ros-distro}}
+    # NB: this line would break if we tried to make ros-distro
+    #     an environment variable instead of a matrix entry
+    container: ros:${{matrix.ros-distro}}-ros-base
     steps:
       - run: sudo rm -rf /etc/ros/rosdep/
       - uses: ros-tooling/setup-ros@0.0.25
