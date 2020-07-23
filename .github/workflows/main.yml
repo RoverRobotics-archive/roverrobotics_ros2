@@ -13,5 +13,6 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.0.17
         with:
           package-name: openrover_demo
+          source-ros-binary-installation: dashing
           vcs-repo-file-url: >
             https://raw.githubusercontent.com/${{github.repository}}/${{github.sha}}/openrover_demo/openrover-demo.repos
