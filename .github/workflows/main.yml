@@ -4,8 +4,11 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: osrf/ros2:dashing-desktop
+    container: ros:dashing-ros-base
     steps:
+    - uses: ros-tooling/setup-ros@0.0.25
+      with:
+        required-ros-distributions: dashing
     - uses: ros-tooling/action-ros-ci@0.0.17
       with:
         package-name: openrover_demo
