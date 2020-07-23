@@ -1,18 +1,19 @@
 name: "Test action-ros-ci"
 on: push
-
+env:
+  ROS_DISTRO: dashing
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ros:dashing-ros-base
+    container: ros:${{env.ros-distro}}-ros-base
     steps:
       - run: sudo rm -rf /etc/ros/rosdep/
       - uses: ros-tooling/setup-ros@0.0.25
         with:
-          required-ros-distributions: dashing
+          required-ros-distributions: ${{env.ROS_DISTRO}}
       - uses: ros-tooling/action-ros-ci@0.0.17
         with:
           package-name: openrover_demo
-          source-ros-binary-installation: dashing
+          source-ros-binary-installation: ${{env.ROS_DISTRO}}
           vcs-repo-file-url: >
             https://raw.githubusercontent.com/${{github.repository}}/${{github.sha}}/openrover_demo/openrover-demo.repos
