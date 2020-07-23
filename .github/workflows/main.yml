@@ -1,12 +1,14 @@
 name: "Test action-ros-ci"
 on: push
+env:
+  ROS_DISTRO: dashing
 jobs:
   build:
     strategy:
       matrix:
         ros-distro: [dashing]
         include:
-          - image: ros:${{matrix.ros-distro}}-ros-base
+          - image: ros:dashing-ros-base
     runs-on: ubuntu-latest
     # doesn't work!
     # container: ros:${{env.ros-distro}}-ros-base
