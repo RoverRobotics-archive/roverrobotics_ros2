@@ -4,7 +4,7 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ros:dashing-ros-base
+    container: osrf/ros2:dashing-desktop
     steps:
     - uses: ros-tooling/action-ros-ci@0.0.17
       with:
