@@ -11,6 +11,6 @@ jobs:
       with:
         required-ros-distributions: dashing
     - uses: ros-tooling/action-ros-ci@0.0.17
-      # with:
-      #   package-name: openrover_demo
+      with:
+        package-name: openrover_demo
       #   vcs-repo-file-url:
