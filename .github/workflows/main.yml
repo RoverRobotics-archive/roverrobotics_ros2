@@ -13,3 +13,4 @@ jobs:
     - uses: ros-tooling/action-ros-ci@0.0.17
       with:
         package-name: openrover_demo
+        vcs-repo-file-url: openrover_demo/openrover-demo.repos
