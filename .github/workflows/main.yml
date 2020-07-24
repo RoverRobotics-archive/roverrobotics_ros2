@@ -1,0 +1,26 @@
+on: push
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - ros-distro: foxy
+            image: ros:foxy
+          - ros-distro: rolling
+            image: ros:rolling
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - run: sudo rm -rf /etc/ros/rosdep/
+      # avert `sudo: setrlimit(RLIMIT_CORE): Operation not permitted`
+      # which was fixed in sudo 1.8.31p1
+      - run: sudo apt update && sudo apt upgrade sudo -y
+      - uses: ros-tooling/setup-ros@0.0.25
+        with:
+          required-ros-distributions: ${{matrix.ros-distro}}
+      - uses: ros-tooling/action-ros-ci@0.0.17
+        with:
+          package-name: openrover_demo
+          source-ros-binary-installation: ${{matrix.ros-distro}}
+          vcs-repo-file-url: >
+            https://raw.githubusercontent.com/${{github.repository}}/${{github.sha}}/openrover_demo/openrover-demo.repos
