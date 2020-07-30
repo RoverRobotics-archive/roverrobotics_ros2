@@ -3,3 +3,7 @@ repositories:
     type: git
     url: https://github.com/RoverRobotics/serial-ros2
     version: master
+  bno055_driver:
+    type: git
+    url: https://github.com/RoverRobotics/ros2_bno055_driver.git
+    version: master
