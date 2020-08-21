@@ -6,6 +6,7 @@
 #include "data.hpp"
 #include "rclcpp/node_options.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include <fstream>
 
 using std::placeholders::_1;
 using namespace openrover;
