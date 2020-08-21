@@ -179,7 +179,7 @@
       <max_wheel_acceleration>0.7</max_wheel_acceleration>
       <max_wheel_torque>8</max_wheel_torque>
       <ros>
-        <argument>odom:=odom_raw</argument>
+        <argument>odom:=odom</argument>
       </ros>
     </plugin>
   </gazebo>
@@ -455,5 +455,30 @@
       <inertia ixx="3.841e-4" ixy="0.0" ixz="0.0" iyy="4.592e-4" iyz="0.0" izz="2.135e-4"/>
     </inertial>
   </link>
+
+  <joint name="camera_link_joint" type="fixed">
+    <parent link="cpu_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.10795 0 0.0635" rpy="0 0 3.14"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0476" radius="0.0381"/>
+      </geometry>
+      <material name="light_black"/>
+    </visual>
+
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.220" />
+      <inertia ixx="1.214e-4"
+               ixy="0.0" iyy="1.214e-4"
+               ixz="0.0" iyz="0.0" izz="1.597e-4" />
+    </inertial>
+  </link>
+
 </robot>
 

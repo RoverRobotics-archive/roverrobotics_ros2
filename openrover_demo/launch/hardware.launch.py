@@ -19,27 +19,35 @@ def generate_launch_description():
     assert hardware_config.is_file()
 
     return LaunchDescription([
-        SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        #SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
         Node(
-            package='openrover_core', node_executable='rover', output='screen',
+            package='openrover_core', executable='rover', output='screen',
             parameters=[hardware_config]
         ),
-        Node(
-            package='bno055_driver',
-            node_executable='bno055_driver',
-            output='screen',
-            parameters=[hardware_config]
-        ),
+        #Node(
+        #    package='bno055_driver',
+        #    node_executable='bno055_driver',
+        #    output='screen',
+        #    parameters=[hardware_config]
+        #),
         Node(
             package='rplidar_ros',
-            node_executable='rplidarNode',
-            output='screen',
+            executable='rplidarNode',
+            #output='screen',
             parameters=[hardware_config],
         ),
+
+        # Realsense
+        Node(
+            package='realsense2_camera', executable='realsense2_camera',
+            output='screen',
+            emulate_tty=True,
+        ),
+
         # todo: this publishes static positions for wheel. Switch to publishing wheel position
         # based on encoder data
         Node(
-            package='joint_state_publisher', node_executable='joint_state_publisher',
+            package='joint_state_publisher', executable='joint_state_publisher',
             output='screen', arguments=[str(urdf)], parameters=[hardware_config]
         ),
     ])

@@ -17,21 +17,19 @@ def generate_launch_description():
     assert presence_config.is_file()
     urdf = Path(get_package_share_directory('openrover_demo'), 'urdf', 'rover.urdf')
     assert urdf.is_file()
-
+    with open(urdf, 'r') as infp:
+        robot_desc = infp.read()
     assert presence_config.is_file()
     return LaunchDescription([
-        SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        #SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '0'),
         Node(
-            package='robot_state_publisher', node_executable='robot_state_publisher',
+            package='robot_state_publisher', executable='robot_state_publisher',
             output='screen', arguments=[str(urdf)], parameters=[presence_config]
         ),
-        Node(
-            package='robot_localization',
-            node_executable='se_node',
-            output='screen',
-            parameters=[presence_config],
-            remappings=[
-                ('odometry/filtered', 'odom')
-            ]
-        ),
+        #Node(
+        #    package='robot_localization',
+        #    executable='ekf_node',
+        #    output='screen',
+        #    parameters=[presence_config],
+        #),
     ])
