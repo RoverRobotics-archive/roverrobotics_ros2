@@ -12,6 +12,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "timestamped.hpp"
+#include "tf2_ros/transform_broadcaster.h"
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 
 namespace openrover
 {
@@ -61,6 +64,13 @@ protected:
   data::LeftMotorEncoderState::Value odom_last_encoder_position_left;
   data::RightMotorEncoderState::Value odom_last_encoder_position_right;
   rclcpp::TimerBase::SharedPtr tmr_odometry;
+  double total_lin_x;
+  double total_lin_y;
+  double total_ang_z;
+  bool tf_broadcast;
+  tf2::Quaternion myQuat;
+  geometry_msgs::msg::TransformStamped tf;
+  std::shared_ptr<tf2_ros::TransformBroadcaster> br;
   void update_odom();
 
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom;

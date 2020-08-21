@@ -22,6 +22,7 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
     "raw_data", rclcpp::QoS(32), [=](msg::RawData::ConstSharedPtr msg) { on_raw_data(msg); });
 
   double odometry_frequency = declare_parameter("odometry_frequency", 10.0);
+  tf_broadcast = declare_parameter("broadcast_tf", true);
   tmr_odometry = create_wall_timer(1s / odometry_frequency, [=]() { update_odom(); });
 
   sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>(
@@ -60,9 +61,9 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   odom_frame_id = declare_parameter("odom_frame_id", "odom");
   odom_child_frame_id = declare_parameter("odom_child_frame_id", "base_footprint");
 
-  encoder_frequency_lr_to_twist_fl <<  //
+  encoder_frequency_lr_to_twist_fl <<  
     meters_per_encoder_sum,
-    meters_per_encoder_sum,  //
+    meters_per_encoder_sum, 
     -radians_per_encoder_difference, +radians_per_encoder_difference;
 
   auto pi_p = declare_parameter("motor_control_gain_p", 0.0005);
@@ -209,17 +210,28 @@ void openrover::Rover::update_odom()
                           encoder_frequency_lr_variance.asDiagonal() *
                           encoder_frequency_lr_to_twist_fl.adjoint();
   {
+
+    //Calculate Odom 
     auto odom = std::make_unique<nav_msgs::msg::Odometry>();
     odom->header.frame_id = odom_frame_id;
     odom->child_frame_id = odom_child_frame_id;
     odom->header.stamp = now;
 
     // In the odom_frame_id
-    odom->pose.covariance.fill(-1.0);
-    // We don't have any odom pose, but rviz complains if the Quat is not
-    // normalized
-    odom->pose.pose.orientation.z = 1.0;
+    odom->pose.covariance.fill(-1.0); //TODO better pose covariance
+    odom->pose.pose.position.x = total_lin_x + twist[0] * cos(twist[1]);
+    odom->pose.pose.position.y = total_lin_y + twist[0] * sin(twist[1]);
+    odom->pose.pose.position.z = 0.0;
+    total_lin_x +=  twist[0] * cos(twist[1]);
+    total_lin_y += twist[0] * sin(twist[1]);
+    total_ang_z += twist[1];
+    total_ang_z = fmod(total_ang_z, 6.28); //total_ang_z = total_ang_z % 6.28;
+    myQuat.setRPY(0,0,total_ang_z);
 
+    odom->pose.pose.orientation.x = myQuat.x();
+    odom->pose.pose.orientation.y = myQuat.y();
+    odom->pose.pose.orientation.z = myQuat.z();
+    odom->pose.pose.orientation.w = myQuat.w();    
     // In the odom_child_frame_id
     odom->twist.twist.linear.x = twist[0];
     odom->twist.twist.angular.z = twist[1];
@@ -230,6 +242,25 @@ void openrover::Rover::update_odom()
     odom->twist.covariance[5 + 5 * 6] = twist_covariance(1, 1);
 
     pub_odom->publish(std::move(odom));
+
+    //update TF;
+    if (tf_broadcast == true){
+      std::ofstream outfile; //Debug
+      outfile.open("test.txt", std::ios_base::app); 
+      outfile << total_lin_x << "," << total_lin_y; //End debug
+      tf.transform.translation.x = odom->pose.pose.position.x;
+      tf.transform.translation.y = odom->pose.pose.position.y;
+      tf.transform.translation.z = odom->pose.pose.position.z;
+      tf.transform.rotation = odom->pose.pose.orientation; //check
+      RCLCPP_DEBUG(get_logger(), "got transforms");
+      tf.header.stamp = now;
+      tf.header.frame_id = odom_frame_id;
+      tf.child_frame_id = odom_child_frame_id;
+      br->sendTransform(tf);
+      RCLCPP_DEBUG(get_logger(), "sent");
+    }
+    
+
   }
 
   odom_last_encoder_position_left = left_encoder_position->state;
