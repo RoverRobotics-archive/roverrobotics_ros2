@@ -41,7 +41,7 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   updater->add("power", [this](auto & t) { update_power_diagnostics(t); });
   updater->add("firmware", [this](auto & t) { update_firmware_diagnostics(t); });
   updater->add("drive", [this](auto & t) { update_drive_diagnostics(t); });
-
+  br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
   // based on the physical capabilities of the rover. Depends on the wheel
   // configuration (2wd/4wd/treads) and terrain
   top_speed_linear = declare_parameter("top_speed_linear", 3.05);
@@ -242,25 +242,27 @@ void openrover::Rover::update_odom()
     odom->twist.covariance[0 + 5 * 6] = odom->twist.covariance[5 + 0 * 6] = twist_covariance(0, 1);
     odom->twist.covariance[5 + 5 * 6] = twist_covariance(1, 1);
 
-    pub_odom->publish(std::move(odom));
+    
 
     //update TF;
     if (tf_broadcast == true){
-      std::ofstream outfile; //Debug
-      outfile.open("test.txt", std::ios_base::app); 
-      outfile << total_lin_x << "," << total_lin_y; //End debug
+      std::ofstream out("output.txt",std::ios_base::app);
+      out << total_lin_x << "," << total_lin_y << std::endl;
+      out.close(); //End debug
+      // RCLCPP_DEBUG(get_logger(), "%f%f", total_lin_x, total_lin_y);
       tf.transform.translation.x = odom->pose.pose.position.x;
       tf.transform.translation.y = odom->pose.pose.position.y;
       tf.transform.translation.z = odom->pose.pose.position.z;
-      tf.transform.rotation = odom->pose.pose.orientation; //check
-      RCLCPP_DEBUG(get_logger(), "got transforms");
+      tf.transform.rotation.x = myQuat.x();
+      tf.transform.rotation.y = myQuat.y();
+      tf.transform.rotation.z = myQuat.z();
+      tf.transform.rotation.w = myQuat.w();
       tf.header.stamp = now;
       tf.header.frame_id = odom_frame_id;
       tf.child_frame_id = odom_child_frame_id;
       br->sendTransform(tf);
-      RCLCPP_DEBUG(get_logger(), "sent");
     }
-    
+    pub_odom->publish(std::move(odom));
 
   }
 

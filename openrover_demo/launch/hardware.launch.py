@@ -38,11 +38,11 @@ def generate_launch_description():
         ),
 
         # Realsense
-        Node(
-            package='realsense2_camera', executable='realsense2_camera',
-            output='screen',
-            emulate_tty=True,
-        ),
+        #Node(
+        #    package='realsense2_camera', executable='realsense2_camera',
+        #    output='screen',
+        #    emulate_tty=True,
+        #),
 
         # todo: this publishes static positions for wheel. Switch to publishing wheel position
         # based on encoder data
