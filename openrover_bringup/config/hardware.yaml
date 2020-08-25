@@ -1,0 +1,22 @@
+rover_serial:
+  ros__parameters:
+    serial_port: /dev/ttyUSB1
+
+rover:
+  ros__parameters:
+    diagnostics_frequency: 0.2
+    odometry_frequency: 15.0
+    meters_per_encoder_sum: 0.00067390542
+    radians_per_encoder_difference: 0.0037130276
+    # 2 Wheel Drive
+    motor_control_gain_p: 0.0005
+    motor_control_gain_i: 0.004
+    # 4 Wheel Drive
+    # motor_control_gain_p: 0.0005
+    # motor_control_gain_i: 0.001
+    motor_control_windup: 100.0
+
+joint_state_publisher:
+  ros__parameters:
+    publish_default_positions: true
+    rate: 30
