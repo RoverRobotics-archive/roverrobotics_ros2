@@ -39,6 +39,7 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   updater->add("power", [this](auto & t) { update_power_diagnostics(t); });
   updater->add("firmware", [this](auto & t) { update_firmware_diagnostics(t); });
   updater->add("drive", [this](auto & t) { update_drive_diagnostics(t); });
+  br = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
   // based on the physical capabilities of the rover. Depends on the wheel
   // configuration (2wd/4wd/treads) and terrain
@@ -150,10 +151,8 @@ void openrover::Rover::update_odom()
     odom_last_encoder_position_left = left_encoder_position->state;
     odom_last_encoder_position_right = right_encoder_position->state;
     odom_last_time = now;
-
     return;
   }
-
   if (
     left_encoder_position->time < odom_last_time || right_encoder_position->time < odom_last_time ||
     left_period->time < odom_last_time || right_period->time < odom_last_time) {
@@ -248,7 +247,7 @@ void openrover::Rover::update_odom()
       // std::ofstream out("output.txt",std::ios_base::app);
       // out << total_lin_x << "," << total_lin_y << std::endl;
       // out.close(); //End debug
-      // RCLCPP_DEBUG(get_logger(), "%f%f", total_lin_x, total_lin_y);
+      RCLCPP_INFO(get_logger(), "%f,%f", odom_pose_x, odom_pose_y);
       tf.transform.translation.x = odom->pose.pose.position.x;
       tf.transform.translation.y = odom->pose.pose.position.y;
       tf.transform.translation.z = odom->pose.pose.position.z;
