@@ -222,8 +222,8 @@ void openrover::Rover::update_odom()
     odom->pose.covariance.fill(-1.0);
     // We don't have any odom pose, but rviz complains if the Quat is not
     // normalized
-    odom_pose_x += cos(twist[1]) * twist[0];
-    odom_pose_y += sin(twist[1]) * twist[0];
+    odom_pose_x += cos(odom_orientation_z) * twist[0];
+    odom_pose_y += sin(odom_orientation_z) * twist[0];
     odom_orientation_z += twist[1];
 
     quat.setRPY(0,0,odom_orientation_z);
@@ -247,7 +247,7 @@ void openrover::Rover::update_odom()
       // std::ofstream out("output.txt",std::ios_base::app);
       // out << total_lin_x << "," << total_lin_y << std::endl;
       // out.close(); //End debug
-      RCLCPP_INFO(get_logger(), "%f,%f", odom_pose_x, odom_pose_y);
+      // RCLCPP_INFO(get_logger(), "%f,%f", odom_pose_x, odom_pose_y);
       tf.transform.translation.x = odom->pose.pose.position.x;
       tf.transform.translation.y = odom->pose.pose.position.y;
       tf.transform.translation.z = odom->pose.pose.position.z;
