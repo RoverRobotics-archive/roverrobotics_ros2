@@ -15,14 +15,19 @@ def generate_launch_description():
     return LaunchDescription([
         # SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
         Node(
-            package='openrover_core', executable='rover', output='screen',
+            package='openrover_core',
+            executable='rover',
+            output='screen',
             parameters=[hardware_config],
             arguments=[('__log_level:=debug')],
         ),
         # todo: this publishes static positions for wheel. Switch to publishing wheel position
         # based on encoder data
         Node(
-            package='joint_state_publisher', executable='joint_state_publisher',
-            output='screen', arguments=[str(urdf)], parameters=[hardware_config]
+            package='joint_state_publisher',
+            executable='joint_state_publisher',
+            output='screen',
+            arguments=[str(urdf)],
+            parameters=[hardware_config]
         ),
     ])
