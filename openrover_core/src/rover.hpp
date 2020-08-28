@@ -12,6 +12,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "timestamped.hpp"
+#include "tf2_ros/transform_broadcaster.h"
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 
 namespace openrover
 {
@@ -39,6 +42,11 @@ protected:
 
   std::string odom_frame_id;
   std::string odom_child_frame_id;
+  float odom_pose_x;
+  float odom_pose_y;
+  float odom_orientation_z;
+  geometry_msgs::msg::TransformStamped tf;
+  std::shared_ptr<tf2_ros::TransformBroadcaster> br;
 
   std::unique_ptr<PIController> left_motor_controller;
   std::unique_ptr<PIController> right_motor_controller;
