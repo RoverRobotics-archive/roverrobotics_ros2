@@ -2,6 +2,7 @@ on: push
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - ros-distro: foxy
