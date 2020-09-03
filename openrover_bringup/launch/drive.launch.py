@@ -8,23 +8,25 @@ from math import pi
 
 
 def generate_launch_description():
-    bringup_dir = get_package_share_directory('slam_toolbox')
-    sensors_launch = IncludeLaunchDescription(PythonLaunchDescriptionSource([bringup_dir, '/launch/sernsors.launch.py']))
 
-    return LaunchDescription({
-        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/control.launch.py'])),
-        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/hardware.launch.py'])),
-        IncludeLaunchDescription(PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/sensors.launch.py'])),
+    return LaunchDescription([
+        SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            [ThisLaunchFileDir(), '/hardware.launch.py'])),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            [ThisLaunchFileDir(), '/sensors.launch.py'])),
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",
             output='screen',
-            arguments=['0', '0', '0.25', '0', '0', '0', 'base_footprint', 'base_link'],
+            arguments=['0', '0', '0.25', '0', '0',
+                       '0', 'base_footprint', 'base_link'],
         ),
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",
             output='screen',
-            arguments=['0', '0', '0.05', str(pi), '0', '0', 'base_link', 'laser'],
+            arguments=['0', '0', '0.05', str(
+                pi), '0', '0', 'base_link', 'laser'],
         ),
-    })
+    ])

@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>openrover_navigation</name>
+    <version>0.0.0</version>
+    <description>Example of how to operate a robot with ROS2 using the OpenRover platform.</description>
+    <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+    <license>BSD-3-Clause</license>
+
+    <author email="info@roverrobotics.com">Rover Robotics</author>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
+    <!-- for kicking off the various launch scripts -->
+    <exec_depend>launch</exec_depend>
+    <exec_depend>launch_ros</exec_depend>
+
+    <!-- for describing the robot's appearance and the relative
+        position of sensors in space -->
+    <exec_depend>joint_state_publisher</exec_depend>
+    <exec_depend>robot_state_publisher</exec_depend>
+    <exec_depend>urdf</exec_depend>
+
+    <!-- for visualizing robot data -->
+    <exec_depend>rviz2</exec_depend>
+
+    <!-- for interfacing with hardware -->
+    <exec_depend>openrover_core</exec_depend>
+    <exec_depend>bno055_driver</exec_depend>
+    <exec_depend>rplidar_ros</exec_depend>
+
+    <!-- for sensor fusion -->
+    <exec_depend>robot_localization</exec_depend>
+
+    <!-- for keyboard teleop -->
+    <exec_depend>keystroke</exec_depend>
+
+    <!-- for generating maps -->
+    <exec_depend>cartographer_ros</exec_depend>
+
+    <!-- navigation2 stack, for path planning and execution -->
+    <exec_depend>nav2_map_server</exec_depend>
+    <exec_depend>nav2_behavior_tree</exec_depend>
+    <exec_depend>nav2_amcl</exec_depend>
+    <exec_depend>nav2_world_model</exec_depend>
+    <exec_depend>nav2_dwb_controller</exec_depend>
+    <exec_depend>nav2_navfn_planner</exec_depend>
+    <exec_depend>nav2_bt_navigator</exec_depend>
+    <exec_depend>nav2_recoveries</exec_depend>
+    <exec_depend>nav2_lifecycle_manager</exec_depend>
+
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+</package>
+

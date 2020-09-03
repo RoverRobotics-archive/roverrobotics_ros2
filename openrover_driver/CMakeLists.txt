@@ -24,7 +24,7 @@ find_package(diagnostic_updater REQUIRED)
 include_directories(include/ src/)
 file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
-add_executable(rover
+add_executable(openrover_driver
   src/composition.cpp
   src/rover_serial.cpp
   src/rover.cpp
@@ -32,12 +32,12 @@ add_executable(rover
   src/pi_controller.cpp
   ${AllHeaders})
 
-target_include_directories(rover
+target_include_directories(openrover_driver
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(rover
+ament_target_dependencies(openrover_driver
   rclcpp
   std_msgs
   serial
@@ -49,7 +49,7 @@ ament_target_dependencies(rover
   )
 
 install(TARGETS
-  rover
+  openrover_driver
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

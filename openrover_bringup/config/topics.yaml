@@ -1,4 +1,4 @@
-xbox_mapper:
+ps4_mapper:
   topic: /cmd_vel
   type: Twist
   publish_multiple_halt: false

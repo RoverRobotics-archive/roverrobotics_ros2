@@ -202,7 +202,7 @@
     <visual>
       <origin rpy="0 0 1.57" xyz="-0.142 0 0.055"/>
       <geometry>
-        <mesh filename="package://openrover_demo/meshes/2WD_OpenRover.stl" scale="1 1 1"/>
+        <mesh filename="package://openrover_navigation/meshes/2WD_OpenRover.stl" scale="1 1 1"/>
         <!--
       <origin xyz="-0.142 0 0" rpy="0 0 0"/>
       <geometry>
@@ -233,7 +233,7 @@
     <visual>
       <origin rpy="-1.57 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://openrover_demo/meshes/left_wheel.stl" scale="1 1 1"/>
+        <mesh filename="package://openrover_navigation/meshes/left_wheel.stl" scale="1 1 1"/>
         <!--
       <origin xyz="0 0 0" rpy="0 0 3.14"/>
       <geometry>
@@ -264,7 +264,7 @@
     <visual>
       <origin rpy="1.57 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://openrover_demo/meshes/right_wheel.stl" scale="1 1 1"/>
+        <mesh filename="package://openrover_navigation/meshes/right_wheel.stl" scale="1 1 1"/>
         <!--
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -294,7 +294,7 @@
     <visual>
       <origin rpy="1.57 0 -1.57" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://openrover_demo/meshes/sheetmetal_part.stl" scale="1 1 1"/>
+        <mesh filename="package://openrover_navigation/meshes/sheetmetal_part.stl" scale="1 1 1"/>
         <!--
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
@@ -402,7 +402,7 @@
     <visual>
       <origin rpy="1.57 0 3.14" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://openrover_demo/meshes/left_caster_wheel.stl" scale="1 1 1"/>
+        <mesh filename="package://openrover_navigation/meshes/left_caster_wheel.stl" scale="1 1 1"/>
         <!--
       <origin xyz="-0.028 0 -0.065" rpy="1.57 0 3.14"/>
       <geometry>
@@ -434,7 +434,7 @@
     <visual>
       <origin rpy="1.57 0 3.14" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://openrover_demo/meshes/right_caster_wheel.stl" scale="1 1 1"/>
+        <mesh filename="package://openrover_navigation/meshes/right_caster_wheel.stl" scale="1 1 1"/>
         <!--
       <origin xyz="-0.028 0 -0.065" rpy="1.57 0 3.14"/>
       <geometry>

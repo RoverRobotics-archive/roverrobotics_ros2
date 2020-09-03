@@ -13,10 +13,10 @@ def generate_launch_description():
     assert hardware_config.is_file()
 
     return LaunchDescription([
-        # SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
         Node(
-            package='openrover_core',
-            executable='rover',
+            package='openrover_driver',
+            executable='openrover_driver',
             output='screen',
             parameters=[hardware_config],
             arguments=[('__log_level:=debug')],
