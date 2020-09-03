@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>roverrobotics_ros2</name>
+  <version>0.1.0</version>
+  <description>
+    Messages for communicating with a Rover Pro.
+  </description>
+  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <author email="info@roverrobotics.com">Rover Robotics</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>rover_description</exec_depend>
+  <exec_depend>rover_driver</exec_depend>
+  <exec_depend>rover_msgs</exec_depend>
+  <!-- Navigation is not ready for full support, will be available in next release -->
+  <!-- <exec_depend>rover_description</exec_depend> -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
