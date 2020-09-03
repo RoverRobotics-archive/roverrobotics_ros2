@@ -1,4 +1,4 @@
 # roverrobotics_ros2
-Packages for running an OpenRover robot on ROS2
+Packages for using Rover Robotics products with ROS 2
 
-Documentation for this package can be found at http://wiki.ros.org/openrover-ros2
+Documentation for this package can be found at http://wiki.ros.org/roverrobotics-ros2
