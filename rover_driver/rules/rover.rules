@@ -1,0 +1,10 @@
+# udev rules for mapping rover and related devices
+# to list all properties for ttyUSB0:
+# udevadm info -a -n /dev/ttyUSB0
+#
+# to use this file, sudo cp it into
+# sudo cp install/share/rover_driver/config/rover.rules /etc/udev/rules.d/10-rover.rules && sudo udevadm control --reload-rules && udevadm trigger
+
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="lidar"
+KERNEL=="ttyUSB*", ATTRS{idProduct}=="6001", ATTRS{idVendor}=="0403", SYMLINK+="imu"
+SUBSYSTEM=="tty", ATTRS{serial}=="DM3U53QW", SYMLINK+="rover"

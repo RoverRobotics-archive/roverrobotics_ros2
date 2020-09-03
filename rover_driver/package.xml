@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>rover_driver</name>
+    <version>0.0.0</version>
+    <description>
+        Communicates with an rover robot.
+    </description>
+    <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+    <license>BSD-3-Clause</license>
+
+    <author email="info@roverrobotics.com">Rover Robotics</author>
+
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
+    <depend>eigen</depend>
+    <depend>rclcpp</depend>
+    <depend>std_msgs</depend>
+    <depend>serial</depend>
+    <depend>rover_msgs</depend>
+    <depend>tf2_geometry_msgs</depend>
+    <depend>diagnostic_updater</depend>
+
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
+</package>
+
