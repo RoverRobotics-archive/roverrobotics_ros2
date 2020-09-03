@@ -3,14 +3,20 @@
 <package format="3">
   <name>rover_description</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="nicholas.padilla@npcomplete.io">nick</maintainer>
+  <description>
+    URDF description of Rover.
+  </description>
+  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
   <license>BSD-3-Clause</license>
+
+  <author email="info@roverrobotics.com">Rover Robotics</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+
+  <exec_depend>urdf</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
