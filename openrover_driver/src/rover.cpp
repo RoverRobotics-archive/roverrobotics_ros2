@@ -12,7 +12,7 @@ using namespace openrover;
 using namespace std::literals::chrono_literals;
 using geometry_msgs::msg::Twist;
 using geometry_msgs::msg::Vector3;
-using namespace openrover_core_msgs;
+using namespace openrover_msgs;
 
 Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
@@ -27,9 +27,9 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", rclcpp::QoS(1), [=](Twist::ConstSharedPtr msg) { on_cmd_vel(msg); });
   pub_rover_command =
-    create_publisher<openrover_core_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(32));
+    create_publisher<openrover_msgs::msg::RawCommand>("openrover_command", rclcpp::QoS(32));
   pub_motor_efforts =
-    create_publisher<openrover_core_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
+    create_publisher<openrover_msgs::msg::RawMotorCommand>("motor_efforts", rclcpp::QoS(1));
   pub_odom = create_publisher<nav_msgs::msg::Odometry>("odom_raw", rclcpp::QoS(4));
 
   double diagnostics_frequency = declare_parameter("diagnostics_frequency", 0.2);
@@ -129,7 +129,7 @@ void openrover::Rover::update_odom()
 {
   for (auto arg : {data::LeftMotorEncoderState::Which, data::RightMotorEncoderState::Which,
                    data::LeftMotorEncoderPeriod::Which, data::RightMotorEncoderPeriod::Which}) {
-    openrover_core_msgs::msg::RawCommand cmd;
+    openrover_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
     cmd.arg = arg;
     pub_rover_command->publish(cmd);
@@ -196,7 +196,7 @@ void openrover::Rover::update_odom()
     left_wheel_fwd = (l_effort >= 0);
     right_wheel_fwd = (r_effort >= 0);
 
-    openrover_core_msgs::msg::RawMotorCommand e;
+    openrover_msgs::msg::RawMotorCommand e;
     e.left = to_motor_command(l_effort);
     e.right = to_motor_command(r_effort);
     e.flipper = to_motor_command(0);  // todo
@@ -269,7 +269,7 @@ void openrover::Rover::update_odom()
   odom_last_time = now;
 }
 
-void openrover::Rover::on_raw_data(openrover_core_msgs::msg::RawData::ConstSharedPtr data)
+void openrover::Rover::on_raw_data(openrover_msgs::msg::RawData::ConstSharedPtr data)
 {
   most_recent_data[data->which] =
     std::make_unique<Timestamped<data::RawValue>>(get_clock()->now(), data->value);
@@ -282,7 +282,7 @@ void Rover::update_power_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
                      data::BatteryBStateOfCharge::which(), data::BatteryACurrent::which(),
                      data::BatteryBCurrent::which(), data::BatteryACurrentInternal::which(),
                      data::BatteryBCurrentInternal::which()}) {
-    openrover_core_msgs::msg::RawCommand cmd;
+    openrover_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
     cmd.arg = which;
     pub_rover_command->publish(cmd);
@@ -333,7 +333,7 @@ void Rover::update_power_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
 
 void Rover::update_firmware_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status)
 {
-  openrover_core_msgs::msg::RawCommand cmd;
+  openrover_msgs::msg::RawCommand cmd;
   cmd.verb = 10;
   cmd.arg = data::RoverVersion::which();
   pub_rover_command->publish(cmd);
@@ -355,7 +355,7 @@ void Rover::update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
   for (auto which : {data::MotorTemperature1::which(), data::LeftMotorStatus::which(),
                      data::RightMotorStatus::which(), data::FlipperMotorStatus::which(),
                      data::CoolingFan1DutyFactor::which(), data::CoolingFan2DutyFactor::which()}) {
-    openrover_core_msgs::msg::RawCommand cmd;
+    openrover_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
     cmd.arg = which;
     pub_rover_command->publish(cmd);

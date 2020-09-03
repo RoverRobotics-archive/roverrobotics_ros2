@@ -5,9 +5,9 @@
 #include "eigen3/Eigen/Dense"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-#include "openrover_core_msgs/msg/raw_command.hpp"
-#include "openrover_core_msgs/msg/raw_data.hpp"
-#include "openrover_core_msgs/msg/raw_motor_command.hpp"
+#include "openrover_msgs/msg/raw_command.hpp"
+#include "openrover_msgs/msg/raw_data.hpp"
+#include "openrover_msgs/msg/raw_motor_command.hpp"
 #include "pi_controller.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
@@ -57,7 +57,7 @@ protected:
   /// Callback for velocity commands
   void on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg);
   /// Callback for new raw data received
-  void on_raw_data(openrover_core_msgs::msg::RawData::ConstSharedPtr data);
+  void on_raw_data(openrover_msgs::msg::RawData::ConstSharedPtr data);
 
   void update_firmware_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
   void update_power_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
@@ -75,10 +75,10 @@ protected:
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel;
   /// Subscription for raw data coming from the rover
-  rclcpp::Subscription<openrover_core_msgs::msg::RawData>::SharedPtr sub_raw_data;
+  rclcpp::Subscription<openrover_msgs::msg::RawData>::SharedPtr sub_raw_data;
   /// Publisher for efforts going to the rover
-  rclcpp::Publisher<openrover_core_msgs::msg::RawMotorCommand>::SharedPtr pub_motor_efforts;
-  rclcpp::Publisher<openrover_core_msgs::msg::RawCommand>::SharedPtr pub_rover_command;
+  rclcpp::Publisher<openrover_msgs::msg::RawMotorCommand>::SharedPtr pub_motor_efforts;
+  rclcpp::Publisher<openrover_msgs::msg::RawCommand>::SharedPtr pub_rover_command;
 
   template <typename T>
   std::unique_ptr<Timestamped<typename T::Value>> get_recent()

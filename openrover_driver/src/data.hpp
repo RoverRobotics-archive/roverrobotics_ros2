@@ -6,13 +6,13 @@
 #include <sstream>
 #include <string>
 #include "diagnostic_msgs/msg/key_value.hpp"
-#include "openrover_core_msgs/msg/raw_data.hpp"
+#include "openrover_msgs/msg/raw_data.hpp"
 
 namespace openrover
 {
 namespace data
 {
-using openrover_core_msgs::msg::RawData;
+using openrover_msgs::msg::RawData;
 using std::string;
 using RawValue = decltype(RawData::value);
 

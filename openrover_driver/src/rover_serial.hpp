@@ -1,12 +1,12 @@
 #pragma once
 #include <chrono>
-#include "openrover_core_msgs/msg/raw_command.hpp"
-#include "openrover_core_msgs/msg/raw_data.hpp"
-#include "openrover_core_msgs/msg/raw_motor_command.hpp"
+#include "openrover_msgs/msg/raw_command.hpp"
+#include "openrover_msgs/msg/raw_data.hpp"
+#include "openrover_msgs/msg/raw_motor_command.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "serial/serial.h"  //< yes, this is a cpp header
 
-using namespace openrover_core_msgs;
+using namespace openrover_msgs;
 using namespace std::chrono_literals;
 
 using duration = std::chrono::nanoseconds;
@@ -34,15 +34,15 @@ protected:
   /// How often to poll for a uart message
   duration uart_poll_period = 25ms;
 
-  rclcpp::Publisher<openrover_core_msgs::msg::RawData>::SharedPtr pub_raw_data;
-  rclcpp::Subscription<openrover_core_msgs::msg::RawMotorCommand>::SharedPtr sub_motor_efforts;
-  rclcpp::Subscription<openrover_core_msgs::msg::RawCommand>::SharedPtr sub_raw_commands;
+  rclcpp::Publisher<openrover_msgs::msg::RawData>::SharedPtr pub_raw_data;
+  rclcpp::Subscription<openrover_msgs::msg::RawMotorCommand>::SharedPtr sub_motor_efforts;
+  rclcpp::Subscription<openrover_msgs::msg::RawCommand>::SharedPtr sub_raw_commands;
 
-  void on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr);
+  void on_raw_command(openrover_msgs::msg::RawCommand::SharedPtr);
   void read_callback();
   void keepalive_callback();
   void on_kill_motors();
-  void on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg);
+  void on_motor_efforts(openrover_msgs::msg::RawMotorCommand::SharedPtr msg);
   rclcpp::TimerBase::SharedPtr keepalive_timer;
   rclcpp::TimerBase::SharedPtr read_timer;
   rclcpp::TimerBase::SharedPtr kill_motors_timer;

@@ -4,7 +4,7 @@
 #include <iostream>
 
 using serial::Serial;
-using namespace openrover_core_msgs;
+using namespace openrover_msgs;
 using namespace openrover;
 
 const std::array<uint8_t, 3> MOTOR_EFFORT_HALT = {125, 125, 125};
@@ -63,7 +63,7 @@ RoverSerial::RoverSerial()
   // this->create_callback_group(rclcpp::callback_group::CallbackGroupType::MutuallyExclusive);
   kill_motors_timer = create_wall_timer(kill_motors_timeout, [=]() { on_kill_motors(); });
 
-  pub_raw_data = create_publisher<openrover_core_msgs::msg::RawData>("raw_data", rclcpp::QoS(16));
+  pub_raw_data = create_publisher<openrover_msgs::msg::RawData>("raw_data", rclcpp::QoS(16));
 
   sub_motor_efforts = create_subscription<msg::RawMotorCommand>(
     "motor_efforts", rclcpp::QoS(1),
@@ -83,7 +83,7 @@ RoverSerial::RoverSerial()
   }
 }
 
-void RoverSerial::on_raw_command(openrover_core_msgs::msg::RawCommand::SharedPtr cmd)
+void RoverSerial::on_raw_command(openrover_msgs::msg::RawCommand::SharedPtr cmd)
 {
   auto efforts = *motor_efforts_u8;
   std::vector<uint8_t> payload{efforts[0], efforts[1], efforts[2], cmd->verb, cmd->arg};
@@ -155,7 +155,7 @@ void RoverSerial::on_kill_motors()
   motor_efforts_u8 = std::make_shared<std::array<uint8_t, 3>>(MOTOR_EFFORT_HALT);
 }
 
-void RoverSerial::on_motor_efforts(openrover_core_msgs::msg::RawMotorCommand::SharedPtr msg)
+void RoverSerial::on_motor_efforts(openrover_msgs::msg::RawMotorCommand::SharedPtr msg)
 {
   auto new_efforts = std::array<uint8_t, 3>{msg->left, msg->right, msg->flipper};
   motor_efforts_u8 = std::make_shared<const std::array<uint8_t, 3>>(new_efforts);
