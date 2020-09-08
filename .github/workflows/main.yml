@@ -5,7 +5,7 @@ jobs:
       fail-fast: false
       matrix:
         ros-distro: [eloquent]
-        runs-on: [ubuntu-20.04, macos-latest, windows-latest]
+        runs-on: [ubuntu-18.04, macos-latest, windows-latest]
     runs-on: ${{matrix.runs-on}}
     steps:
       - uses: ros-tooling/setup-ros@0.0.25
