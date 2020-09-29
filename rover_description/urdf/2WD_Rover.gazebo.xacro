@@ -5,10 +5,6 @@
     <material>Gazebo/FlatBlack</material>
   </gazebo>
 
-  <gazebo reference="sheetmetal_link">
-    <material>Gazebo/FlatBlack</material>
-  </gazebo>
-
   <gazebo reference="wheel_left_link">
     <mu1>0.7</mu1>
     <mu2>1.0</mu2>

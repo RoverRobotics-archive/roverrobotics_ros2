@@ -23,7 +23,7 @@
   <exec_depend>rviz2</exec_depend>
 
   <!-- for keyboard teleop -->
-  <exec_depend>keystroke</exec_depend>
+  <!-- <exec_depend>keystroke</exec_depend> -->
 
   <!-- navigation2 stack, for path planning and execution -->
   <exec_depend>nav2_amcl</exec_depend>
