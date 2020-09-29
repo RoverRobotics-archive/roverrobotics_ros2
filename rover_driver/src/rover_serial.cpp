@@ -134,7 +134,6 @@ void RoverSerial::read_callback()
       }
 
       auto n = serial_read(inbuf, 1);
-      // RCLCPP_WARN(this->get_logger(), "Bytes read: %d", n);
       if (n == 0) {
         return;  // timed out
       }
@@ -279,11 +278,11 @@ unsigned int RoverSerial::serial_read(std::vector<uint8_t> &inbuf, size_t size)
 unsigned int RoverSerial::serial_write(const uint8_t *data, size_t length)
 {
   unsigned int written_bytes = ::write(*serial_fd_, data, length);
-  // if ( written_bytes  < length)
-  // {
-  //   RCLCPP_FATAL(this->get_logger(), "Failed to send command serial command to rover");
-  //   throw;
-  // }
+  if ( written_bytes  < length)
+  {
+    RCLCPP_FATAL(this->get_logger(), "Failed to send command serial command to rover");
+    throw;
+  }
 
   return written_bytes;
 }
