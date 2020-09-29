@@ -16,7 +16,6 @@
   <depend>eigen</depend>
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
-  <depend>serial</depend>
   <depend>rover_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>diagnostic_updater</depend>

@@ -14,14 +14,13 @@ find_package(ament_cmake REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(serial REQUIRED)
 find_package(rover_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 
-include_directories(include/ src/)
+include_directories(include/)
 file(GLOB_RECURSE AllHeaders ${PROJECT_SOURCE_DIR}/*.hpp)
 
 add_executable(rover_driver
@@ -40,7 +39,6 @@ target_include_directories(rover_driver
 ament_target_dependencies(rover_driver
   rclcpp
   std_msgs
-  serial
   geometry_msgs
   rover_msgs
   nav_msgs
