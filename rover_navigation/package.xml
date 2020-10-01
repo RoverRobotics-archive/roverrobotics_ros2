@@ -3,7 +3,7 @@
 <package format="3">
   <name>rover_navigation</name>
   <version>0.1.0</version>
-  <description>Example navigation for launch files for .</description>
+  <description>Contains Rover navigation launch files</description>
   <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
   <license>BSD-3-Clause</license>
 
@@ -23,7 +23,7 @@
   <exec_depend>rviz2</exec_depend>
 
   <!-- for keyboard teleop -->
-  <exec_depend>keystroke</exec_depend>
+  <!-- <exec_depend>keystroke</exec_depend> -->
 
   <!-- navigation2 stack, for path planning and execution -->
   <exec_depend>nav2_amcl</exec_depend>

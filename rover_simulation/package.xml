@@ -2,15 +2,19 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rover_simulation</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="nicholas.padilla@npcomplete.io">nick</maintainer>
-  <license>TODO: License declaration</license>
+  <version>0.1.0</version>
+  <description>Launch files for Rover Simulation</description>
+  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+  <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+
+  <exec_depend>rover_bringup</exec_depend>
+  <exec_depend>rover_navigation</exec_depend>
+  <!-- <exec_depend>aws_robomaker_small_warehouse_world</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>

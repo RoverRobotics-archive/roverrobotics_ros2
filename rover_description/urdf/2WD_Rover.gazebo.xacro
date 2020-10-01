@@ -5,10 +5,6 @@
     <material>Gazebo/FlatBlack</material>
   </gazebo>
 
-  <gazebo reference="sheetmetal_link">
-    <material>Gazebo/FlatBlack</material>
-  </gazebo>
-
   <gazebo reference="wheel_left_link">
     <mu1>0.7</mu1>
     <mu2>1.0</mu2>
@@ -118,8 +114,8 @@
           <horizontal>
             <samples>360</samples>
             <resolution>1</resolution>
-            <min_angle>-3.14159</min_angle>
-            <max_angle>3.14159</max_angle>
+            <min_angle>0.00</min_angle>
+            <max_angle>6.28</max_angle>
           </horizontal>
         </scan>
         <range>

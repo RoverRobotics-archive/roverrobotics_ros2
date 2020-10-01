@@ -15,6 +15,8 @@ def generate_launch_description():
             [ThisLaunchFileDir(), '/hardware.launch.py'])),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(
             [ThisLaunchFileDir(), '/sensors.launch.py'])),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            [ThisLaunchFileDir(), '/ps4_teleop.launch.py'])),
         Node(
             package="tf2_ros",
             executable="static_transform_publisher",

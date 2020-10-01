@@ -13,9 +13,13 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <exec_depend>rover_bringup</exec_depend>
   <exec_depend>rover_description</exec_depend>
   <exec_depend>rover_driver</exec_depend>
   <exec_depend>rover_msgs</exec_depend>
+  <exec_depend>rover_navigation</exec_depend>
+  <exec_depend>rover_teleop</exec_depend>
+
   <!-- Navigation is not ready for full support, will be available in next release -->
   <!-- <exec_depend>rover_description</exec_depend> -->
 

@@ -1,97 +1,91 @@
-# based on navigation2/nav2_bringup/launch/nav2_bringup_launch.py
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+import os
 
-from pathlib import Path
-
-import launch.actions
-import launch_ros.actions
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    config = Path(get_package_share_directory('rover_navigation'), 'config')
-    nav2_yaml = config / 'nav2.yaml'
-    assert nav2_yaml.is_file()
-    bt_xml_path = config / 'navigate.xml'
-    assert bt_xml_path.is_file()
-    map_yaml_filename = config / 'map.yaml'
-    assert map_yaml_filename.is_file()
+    # Get the launch directory
+    rover_navigation_dir = get_package_share_directory('rover_navigation')
+    nav_bringup_dir = get_package_share_directory('nav2_bringup')
+    nav_launch_dir = os.path.join(nav_bringup_dir, 'launch')
 
-    return LaunchDescription([
-        launch.actions.SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
-        launch_ros.actions.Node(
-            node_name='lifecycle_manager',
-            package='nav2_lifecycle_manager',
-            node_executable='lifecycle_manager',
-            output='screen',
-            parameters=[
-                nav2_yaml,
-                {
-                    'autostart': True,
-                    'node_names': ['map_server', 'amcl', 'world_model', 'dwb_controller',
-                                   'navfn_planner', 'bt_navigator'],
-                }
-            ]
-        ),
-        launch_ros.actions.LifecycleNode(
-            node_name='map_server',
-            package='nav2_map_server',
-            node_executable='map_server',
-            output='screen',
-            parameters=[nav2_yaml, {'yaml_filename': str(map_yaml_filename)}]
-        ),
-        launch_ros.actions.LifecycleNode(
-            node_name='amcl',
-            package='nav2_amcl',
-            node_executable='amcl',
-            output='screen',
-            parameters=[nav2_yaml],
-        ),
-        launch_ros.actions.LifecycleNode(
-            node_name='world_model',
-            package='nav2_world_model',
-            node_executable='world_model',
-            output='screen',
-            parameters=[nav2_yaml]
-        ),
-        launch_ros.actions.LifecycleNode(
-            node_name='dwb_controller',
-            package='dwb_controller',
-            node_executable='dwb_controller',
-            output='screen',
-            parameters=[nav2_yaml],
-        ),
-        launch_ros.actions.LifecycleNode(
-            node_name='navfn_planner',
-            package='nav2_navfn_planner',
-            node_executable='navfn_planner',
-            output='screen',
-            parameters=[nav2_yaml]
-        ),
-        launch_ros.actions.LifecycleNode(
-            node_name='bt_navigator',
-            package='nav2_bt_navigator',
-            node_executable='bt_navigator',
-            output='screen',
-            parameters=[nav2_yaml, {'bt_xml_filename': str(bt_xml_path)}],
-        ),
-        launch_ros.actions.Node(
-            node_name='recoveries_node',
-            package='nav2_recoveries',
-            node_executable='recoveries_node',
-            output='screen',
-            parameters=[nav2_yaml]
-        ),
-    ])
+    # Create the launch configuration variables
+    slam = LaunchConfiguration('slam')
+    map_yaml_file = LaunchConfiguration('map')
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    params_file = LaunchConfiguration('params_file')
+    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
+    autostart = LaunchConfiguration('autostart')
+
+    declare_slam_cmd = DeclareLaunchArgument(
+        'slam',
+        default_value='False',
+        description='Whether run a Navigation2 SLAM')
+
+    declare_map_yaml_cmd = DeclareLaunchArgument(
+        'map',
+        default_value=os.path.join(rover_navigation_dir, 'maps', 'amazon_warehouse.yaml'),
+        description='Full path to map file to load')
+
+    declare_use_sim_time_cmd = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='true',
+        description='Use simulation (Gazebo) clock if true')
+
+    declare_params_file_cmd = DeclareLaunchArgument(
+        'params_file',
+        default_value=os.path.join(nav_bringup_dir, 'params', 'nav2_params.yaml'),
+        description='Full path to the ROS2 parameters file to use for all launched nodes')
+
+    declare_bt_xml_cmd = DeclareLaunchArgument(
+        'default_bt_xml_filename',
+        default_value=os.path.join(
+            get_package_share_directory('nav2_bt_navigator'),
+            'behavior_trees', 'navigate_w_replanning_and_recovery.xml'),
+        description='Full path to the behavior tree xml file to use')
+
+    declare_autostart_cmd = DeclareLaunchArgument(
+        'autostart', default_value='true',
+        description='Automatically startup the nav2 stack')
+
+    declare_use_simulator_cmd = DeclareLaunchArgument(
+        'use_simulator',
+        default_value='True',
+        description='Whether to start the simulator')
+
+    declare_use_robot_state_pub_cmd = DeclareLaunchArgument(
+        'use_robot_state_pub',
+        default_value='True',
+        description='Whether to start the robot state publisher')
+
+    bringup_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(nav_launch_dir, 'bringup_launch.py')),
+        launch_arguments={'slam': slam,
+                          'map': map_yaml_file,
+                          'use_sim_time': use_sim_time,
+                          'params_file': params_file,
+                          'default_bt_xml_filename': default_bt_xml_filename,
+                          'autostart': autostart}.items())
+
+    # Create the launch description and populate
+    ld = LaunchDescription()
+
+    # Declare the launch options
+    ld.add_action(declare_slam_cmd)
+    ld.add_action(declare_map_yaml_cmd)
+    ld.add_action(declare_use_sim_time_cmd)
+    ld.add_action(declare_params_file_cmd)
+    ld.add_action(declare_bt_xml_cmd)
+    ld.add_action(declare_autostart_cmd)
+
+
+    ld.add_action(bringup_cmd)
+
+    return ld
