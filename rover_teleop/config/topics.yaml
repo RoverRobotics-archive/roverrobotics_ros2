@@ -1,0 +1,21 @@
+xbox_mapper:
+  topic: /cmd_vel
+  type: Twist
+  publish_multiple_halt: false
+  throttle:
+    lin_increment: 0.25
+    lin_throttle_ctrl: DPAD_VERT
+    ang_increment: 0.25
+    ang_throttle_ctrl: DPAD_HORIZ
+  turbo: LB
+  data:
+    linear:
+      x: LEFT_JOY_VERT
+      y: 0
+      z: 0
+    angular:
+      x: 0
+      y:
+        - LEFT_TRIGGER
+        - RIGHT_TRIGGER
+      z: RIGHT_JOY_HORIZ
