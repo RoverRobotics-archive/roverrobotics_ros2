@@ -142,8 +142,8 @@
           <horizontal>
             <samples>360</samples>
             <resolution>1</resolution>
-            <min_angle>-1.570795</min_angle>
-            <max_angle>1.570795</max_angle>
+            <min_angle>0.00</min_angle>
+            <max_angle>6.28</max_angle>
           </horizontal>
         </scan>
         <range>
@@ -164,7 +164,7 @@
     <plugin filename="libgazebo_ros_diff_drive.so" name="gazebo_base_controller">
       <odometry_frame>odom</odometry_frame>
       <publish_odom>true</publish_odom>
-      <publish_odom_tf>false</publish_odom_tf>
+      <publish_odom_tf>true</publish_odom_tf>
       <robot_base_frame>base_footprint</robot_base_frame>
       <publish_wheel_tf>false</publish_wheel_tf>
       <update_rate>15.0</update_rate>

@@ -6,6 +6,8 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
+##### THIS LAUNCH FILE DOES NOT CURRENTLY WORK #####
+
 def generate_launch_description():
     aws_warehouse_launch_dir = os.path.join(get_package_share_directory('aws_robomaker_small_warehouse_world'), 'launch')
     simulation_launch_dir = os.path.join(get_package_share_directory('rover_simulation'), 'launch')

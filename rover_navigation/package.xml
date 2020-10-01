@@ -3,7 +3,7 @@
 <package format="3">
   <name>rover_navigation</name>
   <version>0.1.0</version>
-  <description>Example navigation for launch files for .</description>
+  <description>Contains Rover navigation launch files</description>
   <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
   <license>BSD-3-Clause</license>
 
