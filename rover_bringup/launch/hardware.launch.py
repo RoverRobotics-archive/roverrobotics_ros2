@@ -7,9 +7,11 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    urdf = Path(get_package_share_directory('rover_description'), 'urdf', 'rover.urdf')
+    urdf = Path(get_package_share_directory(
+        'rover_description'), 'urdf', 'rover.urdf')
     assert urdf.is_file()
-    hardware_config = Path(get_package_share_directory('rover_bringup'), 'config', 'hardware.yaml')
+    hardware_config = Path(get_package_share_directory(
+        'rover_bringup'), 'config', 'hardware.yaml')
     assert hardware_config.is_file()
 
     return LaunchDescription([

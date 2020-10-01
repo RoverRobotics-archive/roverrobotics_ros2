@@ -13,19 +13,27 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    controller_config = Path(get_package_share_directory('rover_teleop'), 'config', 'ps4_controller.yaml')
+    controller_config = Path(get_package_share_directory(
+        'rover_teleop'), 'config', 'ps4_controller.yaml')
     assert controller_config.is_file()
-    topics_config = Path(get_package_share_directory('rover_teleop'), 'config', 'topics.yaml')
+    topics_config = Path(get_package_share_directory(
+        'rover_teleop'), 'config', 'topics.yaml')
     assert topics_config.is_file()
 
     return LaunchDescription([
         SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
         Node(
-            package='rover_teleop', executable='gamepad_mapper_node.py', output='screen',
-            parameters=[{"controller": str(controller_config), "topics": str(topics_config)}]
+            package='rover_teleop',
+            executable='gamepad_mapper_node.py',
+            output='screen',
+            parameters=[
+                {"controller": str(controller_config),
+                "topics": str(topics_config)}]
         ),
         Node(
-            package='joy', executable='joy_node', output='screen',
+            package='joy',
+            executable='joy_node',
+            output='screen',
             parameters=[{'dev': '/dev/input/jsX'}]
         ),
     ])

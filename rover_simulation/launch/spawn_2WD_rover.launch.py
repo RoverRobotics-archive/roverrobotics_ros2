@@ -28,12 +28,14 @@ def generate_launch_description():
         default_value='True',
         description='Whether to start the robot state publisher')
 
-    urdf = os.path.join(get_package_share_directory('rover_description'), 'urdf', 'rover.urdf')
-    spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
-                        arguments=['-entity', 'rover',
-                                   '-file', urdf],
-                        parameters=[{'use_sim_time': use_sim_time}],
-                        output='screen')
+    urdf = os.path.join(get_package_share_directory(
+        'rover_description'), 'urdf', 'rover.urdf')
+    spawn_entity = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=['-entity', 'rover', '-file', urdf],
+        parameters=[{'use_sim_time': use_sim_time}],
+        output='screen')
 
     start_robot_state_publisher_cmd = Node(
         condition=IfCondition(use_robot_state_pub),
