@@ -153,6 +153,7 @@ void rover::Rover::update_odom()
     odom_last_time = now;
     return;
   }
+  
   if (
     left_encoder_position->time < odom_last_time || right_encoder_position->time < odom_last_time ||
     left_period->time < odom_last_time || right_period->time < odom_last_time) {
