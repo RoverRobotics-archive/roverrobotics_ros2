@@ -1,6 +1,11 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package rover_driver
+Changelog for package rover_teleop
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Forthcoming
+-----------
+* formatting launch.py files and adding env-hooks
+* Contributors: padiln
 
 0.1.0 (2020-10-01)
 ------------------
