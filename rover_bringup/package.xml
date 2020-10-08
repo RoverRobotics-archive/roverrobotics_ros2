@@ -23,7 +23,7 @@
   <exec_depend>rover_driver</exec_depend>
 
   <!-- for interfacing with sensors -->
-  <!-- Currently  -->
+  <!-- Currently rplidar will have to be installed manually since it has not been release as a package -->
   <!-- <exec_depend>rplidar_ros</exec_depend> -->
 
   <export>
