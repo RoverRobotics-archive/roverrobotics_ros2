@@ -19,6 +19,7 @@
   <depend>rover_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>diagnostic_updater</depend>
+  <depend>nav_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
