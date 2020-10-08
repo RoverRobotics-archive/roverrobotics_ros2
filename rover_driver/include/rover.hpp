@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <data.hpp>
 #include "diagnostic_updater/diagnostic_updater.hpp"
 #include "eigen3/Eigen/Dense"
@@ -16,6 +17,9 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 
+using namespace std::chrono_literals;
+
+using duration = std::chrono::nanoseconds;
 namespace rover
 {
 /// This node supervises a Connection node and translates between low-level
@@ -26,6 +30,9 @@ public:
   Rover();
 
 protected:
+  /// If no cmd_vel is recieved, reset the pi controllers
+  duration reset_pi_controller_timeout = 1000ms;
+
   std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>>
     most_recent_data;
 
@@ -62,6 +69,7 @@ protected:
   void update_firmware_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
   void update_power_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
   void update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & status);
+  void on_reset_pi_controllers();
 
   std::shared_ptr<diagnostic_updater::Updater> updater;
 
@@ -79,6 +87,7 @@ protected:
   /// Publisher for efforts going to the rover
   rclcpp::Publisher<rover_msgs::msg::RawMotorCommand>::SharedPtr pub_motor_efforts;
   rclcpp::Publisher<rover_msgs::msg::RawCommand>::SharedPtr pub_rover_command;
+  rclcpp::TimerBase::SharedPtr reset_pi_controller_timer;
 
   template <typename T>
   std::unique_ptr<Timestamped<typename T::Value>> get_recent()
