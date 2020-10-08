@@ -31,6 +31,8 @@ add_executable(rover_driver
   src/pi_controller.cpp
   ${AllHeaders})
 
+target_link_libraries(rover_driver pthread)
+
 target_include_directories(rover_driver
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
