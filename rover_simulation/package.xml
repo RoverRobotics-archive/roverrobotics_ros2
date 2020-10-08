@@ -4,7 +4,7 @@
   <name>rover_simulation</name>
   <version>0.1.0</version>
   <description>Launch files for Rover Simulation</description>
-  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+  <maintainer email="nickpadilla@roverrobotics.com">Nick Padilla</maintainer>
   <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

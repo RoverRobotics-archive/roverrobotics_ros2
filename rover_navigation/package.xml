@@ -4,7 +4,7 @@
   <name>rover_navigation</name>
   <version>0.1.0</version>
   <description>Contains Rover navigation launch files</description>
-  <maintainer email="dan@digilabs.io">Dan Rose</maintainer>
+  <maintainer email="nickpadilla@roverrobotics.com">Nick Padilla</maintainer>
   <license>BSD-3-Clause</license>
 
   <author email="info@roverrobotics.com">Rover Robotics</author>
