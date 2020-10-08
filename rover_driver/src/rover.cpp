@@ -24,6 +24,8 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   double odometry_frequency = declare_parameter("odometry_frequency", 10.0);
   tmr_odometry = create_wall_timer(1s / odometry_frequency, [=]() { update_odom(); });
 
+  reset_pi_controller_timer = create_wall_timer(reset_pi_controller_timeout, [=]() { on_reset_pi_controllers(); });
+
   sub_cmd_vel = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", rclcpp::QoS(1), [=](Twist::ConstSharedPtr msg) { on_cmd_vel(msg); });
   pub_rover_command =
@@ -95,6 +97,8 @@ uint8_t to_motor_command(double d)
 
 void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
 {
+  reset_pi_controller_timer->reset();
+
   // expecting values in the range of +/- linear_top_speed and +/- angular top
   // speed
   auto linear_rate = msg->linear.x;
@@ -396,4 +400,10 @@ void Rover::update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
   }
 
   if (status.message.empty()) status.message = "Okay";
+}
+
+void Rover::on_reset_pi_controllers()
+{
+  left_motor_controller->reset();
+  right_motor_controller->reset();
 }

@@ -52,3 +52,9 @@ void PIController::set_target(double new_target) {
 
   target = new_target;
 }
+
+void PIController::reset() {
+  target = 0.0;
+  error_integral = 0.0;
+  control_value = 0.0;
+}

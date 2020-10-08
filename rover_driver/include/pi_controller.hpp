@@ -33,4 +33,7 @@ public:
   /// @param measured_value Observed output value during this time period
   /// @return New control value
   double step(const rclcpp::Time & now, double measured_value);
+
+  /// Set target value and errors
+  void reset();
 };
