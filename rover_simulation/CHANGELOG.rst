@@ -2,10 +2,9 @@
 Changelog for package rover_simulation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.1 (2020-10-08)
+------------------
 * formatting launch.py files and adding env-hooks
-* Contributors: padiln
 
 0.1.0 (2020-10-01)
 ------------------
