@@ -17,6 +17,7 @@ using namespace rover_msgs;
 Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
   RCLCPP_INFO(get_logger(), "Starting rover driver node");
+  perform_control_loop = false;
 
   sub_raw_data = create_subscription<msg::RawData>(
     "raw_data", rclcpp::QoS(32), [=](msg::RawData::ConstSharedPtr msg) { on_raw_data(msg); });
@@ -60,6 +61,9 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   auto radians_per_encoder_difference =
     declare_parameter("radians_per_encoder_difference", 0.00371);
 
+  /// Publish the odom->base_footprint tf from encoder odometry
+  publish_tf = declare_parameter("publish_tf", false); 
+
   odom_frame_id = declare_parameter("odom_frame_id", "odom");
   odom_child_frame_id = declare_parameter("odom_child_frame_id", "base_footprint");
   odom_pose_x = 0.0;
@@ -98,6 +102,7 @@ uint8_t to_motor_command(double d)
 void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
 {
   reset_pi_controller_timer->reset();
+  perform_control_loop = true;
 
   // expecting values in the range of +/- linear_top_speed and +/- angular top
   // speed
@@ -193,6 +198,7 @@ void rover::Rover::update_odom()
   }
 
   // drive the motors based on closed-loop control
+  if (perform_control_loop)
   {
     auto l_effort = left_motor_controller->step(now, encoder_frequency_lr[0]);
     auto r_effort = right_motor_controller->step(now, encoder_frequency_lr[1]);
@@ -248,7 +254,7 @@ void rover::Rover::update_odom()
     odom->twist.covariance[5 + 5 * 6] = twist_covariance(1, 1);
 
     //update TF;
-    if (true == true){
+    if (publish_tf == true){
       // std::ofstream out("output.txt",std::ios_base::app);
       // out << total_lin_x << "," << total_lin_y << std::endl;
       // out.close(); //End debug
@@ -404,6 +410,7 @@ void Rover::update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
 
 void Rover::on_reset_pi_controllers()
 {
+  perform_control_loop = false;
   left_motor_controller->reset();
   right_motor_controller->reset();
 }

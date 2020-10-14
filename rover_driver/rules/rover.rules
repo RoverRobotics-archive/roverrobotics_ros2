@@ -7,4 +7,4 @@
 
 KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="lidar"
 KERNEL=="ttyUSB*", ATTRS{idProduct}=="6001", ATTRS{idVendor}=="0403", SYMLINK+="imu"
-SUBSYSTEM=="tty", ATTRS{serial}=="DM3U53QW", SYMLINK+="rover"
+KERNEL=="ttyUSB", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", MODE:="0777", SYMLINK+="rover", RUN+="/bin/setserial /dev/%k low_latency"
