@@ -17,6 +17,7 @@ using namespace rover_msgs;
 Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(true))
 {
   RCLCPP_INFO(get_logger(), "Starting rover driver node");
+  perform_control_loop = false;
 
   sub_raw_data = create_subscription<msg::RawData>(
     "raw_data", rclcpp::QoS(32), [=](msg::RawData::ConstSharedPtr msg) { on_raw_data(msg); });
@@ -98,6 +99,7 @@ uint8_t to_motor_command(double d)
 void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
 {
   reset_pi_controller_timer->reset();
+  perform_control_loop = true;
 
   // expecting values in the range of +/- linear_top_speed and +/- angular top
   // speed
@@ -193,6 +195,7 @@ void rover::Rover::update_odom()
   }
 
   // drive the motors based on closed-loop control
+  if (perform_control_loop)
   {
     auto l_effort = left_motor_controller->step(now, encoder_frequency_lr[0]);
     auto r_effort = right_motor_controller->step(now, encoder_frequency_lr[1]);
@@ -404,6 +407,7 @@ void Rover::update_drive_diagnostics(diagnostic_updater::DiagnosticStatusWrapper
 
 void Rover::on_reset_pi_controllers()
 {
+  perform_control_loop = false;
   left_motor_controller->reset();
   right_motor_controller->reset();
 }
