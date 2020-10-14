@@ -31,7 +31,7 @@ public:
 
 protected:
   /// If no cmd_vel is recieved, reset the pi controllers
-  duration reset_pi_controller_timeout = 1000ms;
+  duration reset_pi_controller_timeout = 200ms;
 
   std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>>
     most_recent_data;
