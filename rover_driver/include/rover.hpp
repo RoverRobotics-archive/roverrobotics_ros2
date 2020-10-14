@@ -55,6 +55,7 @@ protected:
   float odom_orientation_z;
   geometry_msgs::msg::TransformStamped tf;
   std::shared_ptr<tf2_ros::TransformBroadcaster> br;
+  bool publish_tf;
 
   std::unique_ptr<PIController> left_motor_controller;
   std::unique_ptr<PIController> right_motor_controller;

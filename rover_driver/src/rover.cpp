@@ -61,6 +61,9 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   auto radians_per_encoder_difference =
     declare_parameter("radians_per_encoder_difference", 0.00371);
 
+  /// Publish the odom->base_footprint tf from encoder odometry
+  publish_tf = declare_parameter("publish_tf", false); 
+
   odom_frame_id = declare_parameter("odom_frame_id", "odom");
   odom_child_frame_id = declare_parameter("odom_child_frame_id", "base_footprint");
   odom_pose_x = 0.0;
@@ -251,7 +254,7 @@ void rover::Rover::update_odom()
     odom->twist.covariance[5 + 5 * 6] = twist_covariance(1, 1);
 
     //update TF;
-    if (true == true){
+    if (publish_tf == true){
       // std::ofstream out("output.txt",std::ios_base::app);
       // out << total_lin_x << "," << total_lin_y << std::endl;
       // out.close(); //End debug
