@@ -11,7 +11,7 @@ def generate_launch_description():
         'rover_description'), 'urdf', 'rover.urdf')
     assert urdf.is_file()
     hardware_config = Path(get_package_share_directory(
-        'rover_bringup'), 'config', 'hardware.yaml')
+        'rover_bringup'), 'config', 'hardware_2wd.yaml')
     assert hardware_config.is_file()
 
     return LaunchDescription([

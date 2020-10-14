@@ -17,6 +17,7 @@ protected:
   double target;
   double error_integral;
   double control_value;
+  bool active;
 
 public:
   PIController(
