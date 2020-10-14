@@ -31,7 +31,8 @@ public:
 
 protected:
   /// If no cmd_vel is recieved, reset the pi controllers
-  duration reset_pi_controller_timeout = 200ms;
+  duration reset_pi_controller_timeout = 100ms;
+  bool perform_control_loop;
 
   std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>>
     most_recent_data;
@@ -54,6 +55,7 @@ protected:
   float odom_orientation_z;
   geometry_msgs::msg::TransformStamped tf;
   std::shared_ptr<tf2_ros::TransformBroadcaster> br;
+  bool publish_tf;
 
   std::unique_ptr<PIController> left_motor_controller;
   std::unique_ptr<PIController> right_motor_controller;

@@ -11,6 +11,7 @@ rover:
     motor_control_gain_p: 0.00017
     motor_control_gain_i: 0.0009
     motor_control_windup: 1000.0
+    publish_tf: true
 
 joint_state_publisher:
   ros__parameters:
