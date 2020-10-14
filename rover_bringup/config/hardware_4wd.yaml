@@ -8,7 +8,7 @@ rover:
     odometry_frequency: 15.0
     meters_per_encoder_sum: 0.00142054624
     radians_per_encoder_difference: 0.00433323124
-    motor_control_gain_p: 0.00017
+    motor_control_gain_p: 0.0002
     motor_control_gain_i: 0.0009
     motor_control_windup: 1000.0
     publish_tf: true
