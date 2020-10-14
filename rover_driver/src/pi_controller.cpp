@@ -22,7 +22,8 @@ PIController::PIController(
       last_time(time_zero),
       target(0.0),
       error_integral(0.0),
-      control_value(0.0)
+      control_value(0.0),
+      active(false)
 {
   assert(proportional_gain >= 0);
   assert(integral_gain >= 0);
@@ -33,6 +34,15 @@ PIController::PIController(
 double PIController::step(const rclcpp::Time & now, double measured_value)
 {
   assert(last_time < now);
+  // When the controller is started or reset it becomes inactive.
+  // The first step of the controller after a period of inactivity
+  // will only set the the last_time var and not update the velocity.
+  if(!active)
+  {
+    last_time = now;
+    active = true;
+    return 0.0;
+  }
   auto error = target - measured_value;
   error_integral += error * (now - last_time).seconds();
   error_integral = clamp(error_integral, -windup_limit, +windup_limit);
@@ -54,6 +64,7 @@ void PIController::set_target(double new_target) {
 }
 
 void PIController::reset() {
+  active = false;
   target = 0.0;
   error_integral = 0.0;
   control_value = 0.0;
