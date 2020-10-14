@@ -71,12 +71,12 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   odom_orientation_z = 0.0;
 
   encoder_frequency_lr_to_twist_fl <<  //
-    meters_per_encoder_sum,
-    meters_per_encoder_sum,  //
-    -radians_per_encoder_difference, +radians_per_encoder_difference;
+    0.5 * meters_per_encoder_sum,
+    0.5 * meters_per_encoder_sum,  //
+    0.5 * -radians_per_encoder_difference, 0.5 * +radians_per_encoder_difference;
 
-  auto pi_p = declare_parameter("motor_control_gain_p", 0.0005);
-  auto pi_i = declare_parameter("motor_control_gain_i", 0.004);
+  auto pi_p = declare_parameter("motor_control_gain_p", 0.00017);
+  auto pi_i = declare_parameter("motor_control_gain_i", 0.0);
   auto pi_windup = declare_parameter("motor_control_windup", 100.0);
   auto now = get_clock()->now();
 
@@ -233,9 +233,9 @@ void rover::Rover::update_odom()
     odom->pose.covariance.fill(-1.0);
     // We don't have any odom pose, but rviz complains if the Quat is not
     // normalized
-    odom_pose_x += cos(odom_orientation_z) * twist[0];
-    odom_pose_y += sin(odom_orientation_z) * twist[0];
-    odom_orientation_z += twist[1];
+    odom_pose_x += cos(odom_orientation_z) * twist[0] * dt;
+    odom_pose_y += sin(odom_orientation_z) * twist[0] * dt;
+    odom_orientation_z += twist[1] * dt;
 
     quat.setRPY(0,0,odom_orientation_z);
 
