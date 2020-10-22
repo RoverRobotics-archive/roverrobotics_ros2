@@ -28,6 +28,4 @@ jobs:
       - uses: ros-tooling/action-ros-ci@master
         with:
           package-name: ${{matrix.package}}
-          source-ros-binary-installation: ${{matrix.ros-distro}}
-#          vcs-repo-file-url: >
-#            https://raw.githubusercontent.com/${{github.repository}}/${{github.sha}}/rover_bringup/rover-bringup.repos
+          target-ros2-distro: ${{matrix.ros-distro}}
