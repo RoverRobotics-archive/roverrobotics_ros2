@@ -20,8 +20,8 @@ jobs:
           - ros-distro: rolling
             experimental: true
 
-    runs-on: ubuntu-latest
-    container: ${{ matrix.image }}
+    runs-on: ubuntu-20.04
+    container: osrf/ros:${{ matrix.ros-distro }}
     steps:
       - run: sudo rm -rf /etc/ros/rosdep/
       # avert `sudo: setrlimit(RLIMIT_CORE): Operation not permitted`
