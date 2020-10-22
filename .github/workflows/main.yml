@@ -4,11 +4,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        ros-distro: [foxy, rolling]
+        package:
+          [
+            rover_bringup,
+            rover_description,
+            rover_driver,
+            rover_msgs,
+            rover_navigation,
+            rover_simulation,
+            rover_teleop,
+            roverrobotics_ros2,
+          ]
         include:
-          - ros-distro: foxy
-            image: ros:foxy
           - ros-distro: rolling
-            image: ros:rolling
+            experimental: true
+
     runs-on: ubuntu-latest
     container: ${{ matrix.image }}
     steps:
@@ -16,12 +27,12 @@ jobs:
       # avert `sudo: setrlimit(RLIMIT_CORE): Operation not permitted`
       # which was fixed in sudo 1.8.31p1
       - run: sudo apt update && sudo apt upgrade sudo -y
-      - uses: ros-tooling/setup-ros@0.0.25
+      - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{matrix.ros-distro}}
-      - uses: ros-tooling/action-ros-ci@0.0.17
+      - uses: ros-tooling/action-ros-ci@master
         with:
-          package-name: openrover_demo
+          package-name: ${{matrix.package}}
           source-ros-binary-installation: ${{matrix.ros-distro}}
-          vcs-repo-file-url: >
-            https://raw.githubusercontent.com/${{github.repository}}/${{github.sha}}/rover_bringup/rover-bringup.repos
+#          vcs-repo-file-url: >
+#            https://raw.githubusercontent.com/${{github.repository}}/${{github.sha}}/rover_bringup/rover-bringup.repos
