@@ -4,7 +4,7 @@
   <name>roverrobotics_ros2</name>
   <version>0.1.1</version>
   <description>
-    Messages for communicating with a Rover Pro.
+    Metapackage containing all packages for operating a Rover Pro robot.
   </description>
   <maintainer email="nickpadilla@roverrobotics.com">Nick Padilla</maintainer>
   <license>BSD-3-Clause</license>
@@ -19,9 +19,6 @@
   <exec_depend>rover_msgs</exec_depend>
   <exec_depend>rover_navigation</exec_depend>
   <exec_depend>rover_teleop</exec_depend>
-
-  <!-- Navigation is not ready for full support, will be available in next release -->
-  <!-- <exec_depend>rover_description</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>
