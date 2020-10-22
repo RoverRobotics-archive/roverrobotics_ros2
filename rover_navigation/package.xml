@@ -27,6 +27,7 @@
 
   <!-- navigation2 stack, for path planning and execution -->
   <exec_depend>nav2_amcl</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
   <exec_depend>nav2_bt_navigator</exec_depend>
   <exec_depend>nav2_costmap_2d</exec_depend>
   <exec_depend>nav2_core</exec_depend>
