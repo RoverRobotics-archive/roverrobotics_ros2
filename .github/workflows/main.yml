@@ -21,12 +21,7 @@ jobs:
             experimental: true
 
     runs-on: ubuntu-20.04
-    container: osrf/ros:${{ matrix.ros-distro }}
     steps:
-      - run: sudo rm -rf /etc/ros/rosdep/
-      # avert `sudo: setrlimit(RLIMIT_CORE): Operation not permitted`
-      # which was fixed in sudo 1.8.31p1
-      - run: sudo apt update && sudo apt upgrade sudo -y
       - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{matrix.ros-distro}}
