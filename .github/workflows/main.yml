@@ -18,7 +18,10 @@ jobs:
           ]
         include:
           - ros-distro: rolling
+            repos-url: https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
             experimental: true
+          - ros-distro: foxy
+            repos-url: https://raw.githubusercontent.com/ros2/ros2/foxy-release/ros2.repos
 
     runs-on: ubuntu-20.04
     steps:
@@ -29,3 +32,4 @@ jobs:
         with:
           package-name: ${{matrix.package}}
           target-ros2-distro: ${{matrix.ros-distro}}
+          vcs-repo-file-url: ${{matrix.repos-url}}
