@@ -5,16 +5,16 @@ rover_serial:
 rover:
   ros__parameters:
     diagnostics_frequency: 0.2
-    odometry_frequency: 15.0
-    meters_per_encoder_sum: 0.00004492702 #0.00067390542
-    radians_per_encoder_difference: 0.00024753517 #0.0037130276
-    # 2 Wheel Drive
-    motor_control_gain_p: 0.00005
-    motor_control_gain_i: 0.000
-    # 4 Wheel Drive
-    # motor_control_gain_p: 0.0005
-    # motor_control_gain_i: 0.001
-    motor_control_windup: 100.0
+    odometry_frequency: 30.0
+    meters_per_encoder_sum: 0.00142054624
+    radians_per_encoder_difference: 0.00785398163
+    motor_control_gain_p: 0.0001
+    motor_control_gain_i: 0.001
+    motor_control_windup: 1000.0
+    min_speed: 0.1
+    max_speed: 2.0
+    min_turn_speed: 0.1
+    max_turn_speed: 2.14
     publish_tf: true
 
 joint_state_publisher:

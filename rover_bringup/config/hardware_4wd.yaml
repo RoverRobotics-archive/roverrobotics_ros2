@@ -9,8 +9,12 @@ rover:
     meters_per_encoder_sum: 0.00142054624
     radians_per_encoder_difference: 0.00433323124
     motor_control_gain_p: 0.0002
-    motor_control_gain_i: 0.0009
+    motor_control_gain_i: 0.0012
     motor_control_windup: 1000.0
+    min_speed: 0.1
+    max_speed: 2.0
+    min_turn_speed: 1.1
+    max_turn_speed: 2.14
     publish_tf: true
 
 joint_state_publisher:

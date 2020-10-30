@@ -31,7 +31,7 @@ public:
 
 protected:
   /// If no cmd_vel is recieved, reset the pi controllers
-  duration reset_pi_controller_timeout = 100ms;
+  duration reset_pi_controller_timeout = 200ms;
   bool perform_control_loop;
 
   std::unordered_map<uint8_t, std::shared_ptr<const Timestamped<std::array<uint8_t, 2>>>>
@@ -62,6 +62,11 @@ protected:
 
   bool left_wheel_fwd{};
   bool right_wheel_fwd{};
+
+  float min_speed;
+  float max_speed;
+  float min_turn_speed;
+  float max_turn_speed;
 
   /// Callback for velocity commands
   void on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg);

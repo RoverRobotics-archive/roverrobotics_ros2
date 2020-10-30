@@ -34,6 +34,6 @@ def generate_launch_description():
             package='joy',
             executable='joy_node',
             output='screen',
-            parameters=[{'dev': '/dev/input/jsX'}]
+            parameters=[{'dev': '/dev/input/js1'}]
         ),
     ])

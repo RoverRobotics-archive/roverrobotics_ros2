@@ -150,7 +150,7 @@
   <joint name="imu_link_joint" type="fixed">
     <parent link="plate_link"/>
     <child link="imu_link"/>
-    <origin xyz="0.1365 0 0.0026" rpy="0 0 0"/>
+    <origin xyz="-0.0032 0 0.0" rpy="0 0 0"/>
   </joint>
 
   <link name="imu_link">
@@ -202,7 +202,7 @@
   <joint name="lidar_link_joint" type="fixed">
     <parent link="cpu_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0.10795 0 0.0635" rpy="0 0 3.14"/>
+    <origin xyz="0.202 0 0.0635" rpy="0 0 3.14"/>
   </joint>
 
   <link name="lidar_link">

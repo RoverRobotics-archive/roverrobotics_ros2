@@ -45,6 +45,14 @@ struct UnknownDataElement
     return stream.str();
   }
 };
+struct LeftMotorRPM : KnownDataElement<2, int16_t>
+{
+  static int16_t decode(rover::data::RawValue r) { return as_int16(r); }
+};
+struct RightMotorRPM : KnownDataElement<4, int16_t>
+{
+  static int16_t decode(rover::data::RawValue r) { return as_int16(r); }
+};
 struct LeftMotorEncoderState : KnownDataElement<14, int16_t>
 {
   static int16_t decode(rover::data::RawValue r) { return as_int16(r); }

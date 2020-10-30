@@ -11,23 +11,12 @@ def generate_launch_description():
 
     return LaunchDescription([
         SetEnvironmentVariable('RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1'),
+        # IncludeLaunchDescription(PythonLaunchDescriptionSource(
+        #     [ThisLaunchFileDir(), '/xbox_teleop.launch.py'])),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(
-            [ThisLaunchFileDir(), '/hardware.launch.py'])),
+            [ThisLaunchFileDir(), '/hardware_4wd.launch.py'])),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(
             [ThisLaunchFileDir(), '/sensors.launch.py'])),
-        IncludeLaunchDescription(PythonLaunchDescriptionSource(
-            [ThisLaunchFileDir(), '/ps4_teleop.launch.py'])),
-        Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            output='screen',
-            arguments=['0', '0', '0.25', '0', '0',
-                       '0', 'base_footprint', 'base_link'],
-        ),
-        Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            output='screen',
-            arguments=['0', '0', '0.05', str(pi), '0', '0', 'base_link', 'laser'],
-        ),
+        # IncludeLaunchDescription(PythonLaunchDescriptionSource(
+        #     [ThisLaunchFileDir(), '/sensor_fusion.launch.py'])),
     ])
