@@ -23,6 +23,13 @@ def generate_launch_description():
             parameters=[hardware_config],
             arguments=[('__log_level:=debug')],
         ),
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            arguments=[str(urdf)],
+        ),
         # todo: this publishes static positions for wheel. Switch to publishing wheel position
         # based on encoder data
         Node(

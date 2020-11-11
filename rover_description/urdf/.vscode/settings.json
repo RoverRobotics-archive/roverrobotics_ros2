@@ -1,0 +1,7 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/nick/development/waypoint_ws/install/rover_msgs/lib/python3.8/site-packages",
+        "/home/nick/development/waypoint_ws/install/realsense_msgs/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
+}

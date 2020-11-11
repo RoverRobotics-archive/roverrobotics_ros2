@@ -80,6 +80,11 @@ Rover::Rover() : Node("rover", rclcpp::NodeOptions().use_intra_process_comms(tru
   auto pi_windup = declare_parameter("motor_control_windup", 100.0);
   auto now = get_clock()->now();
 
+  min_speed = declare_parameter("min_speed", 0.1);
+  max_speed = declare_parameter("max_speed", 1.0);
+  min_turn_speed = declare_parameter("min_turn_speed", 0.88);
+  max_turn_speed = declare_parameter("max_turn_speed", 3.14);
+
   left_motor_controller = std::make_unique<PIController>(pi_p, pi_i, pi_windup, now);
   right_motor_controller = std::make_unique<PIController>(pi_p, pi_i, pi_windup, now);
 }
@@ -112,6 +117,9 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
       get_logger(), "Requested linear velocity %f higher than maximum %f", linear_rate,
       top_speed_linear);
   }
+  if (linear_rate < min_speed && linear_rate > -min_speed) linear_rate = 0.0;
+  else if (linear_rate > max_speed) linear_rate = max_speed;
+  else if (linear_rate < -max_speed) linear_rate = -max_speed;
 
   auto turn_rate = msg->angular.z;
   if (top_speed_angular < std::abs(turn_rate)) {
@@ -119,6 +127,10 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
       get_logger(), "Requested angular velocity %f higher than maximum %f", turn_rate,
       top_speed_angular);
   }
+  
+  if (turn_rate < min_turn_speed && turn_rate > -min_turn_speed) turn_rate = 0.0;
+  else if (turn_rate > max_turn_speed) turn_rate = max_turn_speed;
+  else if (turn_rate < -max_turn_speed) turn_rate = -max_turn_speed;
 
   Eigen::Vector2d twist_fl(linear_rate, turn_rate);
 
@@ -137,7 +149,8 @@ void Rover::on_cmd_vel(geometry_msgs::msg::Twist::ConstSharedPtr msg)
 void rover::Rover::update_odom()
 {
   for (auto arg : {data::LeftMotorEncoderState::Which, data::RightMotorEncoderState::Which,
-                   data::LeftMotorEncoderPeriod::Which, data::RightMotorEncoderPeriod::Which}) {
+                   data::LeftMotorEncoderPeriod::Which, data::RightMotorEncoderPeriod::Which,
+                   data::LeftMotorRPM::Which, data::RightMotorRPM::Which}) {
     rover_msgs::msg::RawCommand cmd;
     cmd.verb = 10;
     cmd.arg = arg;
@@ -149,6 +162,8 @@ void rover::Rover::update_odom()
   auto right_encoder_position = get_recent<data::RightMotorEncoderState>();
   auto left_period = get_recent<data::LeftMotorEncoderPeriod>();
   auto right_period = get_recent<data::RightMotorEncoderPeriod>();
+  auto left_motor_rpm = get_recent<data::LeftMotorRPM>();
+  auto right_motor_rpm = get_recent<data::RightMotorRPM>();
 
   if (!left_encoder_position || !right_encoder_position || !left_period || !right_period) {
     RCLCPP_WARN_SKIPFIRST(get_logger(), "Odometry not ready yet");
@@ -281,7 +296,7 @@ void rover::Rover::update_odom()
 }
 
 void rover::Rover::on_raw_data(rover_msgs::msg::RawData::ConstSharedPtr data)
-{
+{ 
   most_recent_data[data->which] =
     std::make_unique<Timestamped<data::RawValue>>(get_clock()->now(), data->value);
 }
