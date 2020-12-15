@@ -285,3 +285,14 @@ recoveries_server:
 robot_state_publisher:
   ros__parameters:
     use_sim_time: False
+
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: False
+    waypoint_plugins: ["PhotoAtWaypoint"]
+    PhotoAtWaypoint:
+      plugin: "nav2_waypoint_follower/PhotoAtWaypoint"
+      enabled: True
+      save_dir: "~/"
+      image_format: ".png"
+      image_topic: "/waypoint/img"

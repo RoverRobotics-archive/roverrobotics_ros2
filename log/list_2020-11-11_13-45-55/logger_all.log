@@ -1,0 +1,106 @@
+[0.187s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'list', '-p', '--base-paths', '/home/nick/development/waypoint_ws/src/roverrobotics_ros2']
+[0.188s] DEBUG:colcon:Parsed command line arguments: Namespace(base_paths=['/home/nick/development/waypoint_ws/src/roverrobotics_ros2'], build_base='build', ignore_user_meta=False, log_base=None, log_level=None, main=<bound method ListVerb.main of <colcon_package_information.verb.list.ListVerb object at 0x7f2efb351460>>, metas=['./colcon.meta'], names_only=False, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_end=None, packages_ignore=None, packages_ignore_regex=None, packages_select=None, packages_select_build_failed=False, packages_select_by_dep=None, packages_select_regex=None, packages_select_test_failures=False, packages_skip=None, packages_skip_build_finished=False, packages_skip_by_dep=None, packages_skip_regex=None, packages_skip_test_passed=False, packages_skip_up_to=None, packages_start=None, packages_up_to=None, packages_up_to_regex=None, paths=None, paths_only=True, topological_graph=False, topological_graph_density=False, topological_graph_dot=False, topological_graph_dot_cluster=False, topological_graph_dot_include_skipped=False, topological_graph_legend=False, topological_order=False, verb_extension=<colcon_package_information.verb.list.ListVerb object at 0x7f2efb351460>, verb_name='list', verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7f2efb2a0220>)
+[0.256s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.256s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.256s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.256s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.256s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.257s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/nick/development/waypoint_ws/src/roverrobotics_ros2'
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extensions ['ignore', 'ignore_ament_install']
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'ignore'
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'ignore_ament_install'
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extensions ['colcon_pkg']
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'colcon_pkg'
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extensions ['colcon_meta']
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'colcon_meta'
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extensions ['ros']
+[0.257s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'ros'
+[0.270s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extensions ['cmake', 'python']
+[0.270s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'cmake'
+[0.270s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'python'
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extensions ['python_setup_py']
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2) by extension 'python_setup_py'
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/log) by extensions ['ignore', 'ignore_ament_install']
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/log) by extension 'ignore'
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/log) ignored
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extensions ['ignore', 'ignore_ament_install']
+[0.271s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extension 'ignore'
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extension 'ignore_ament_install'
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extensions ['colcon_pkg']
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extension 'colcon_pkg'
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extensions ['colcon_meta']
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extension 'colcon_meta'
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extensions ['ros']
+[0.272s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup) by extension 'ros'
+[0.276s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_bringup' with type 'ros.ament_cmake' and name 'rover_bringup'
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extensions ['ignore', 'ignore_ament_install']
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extension 'ignore'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extension 'ignore_ament_install'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extensions ['colcon_pkg']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extension 'colcon_pkg'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extensions ['colcon_meta']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extension 'colcon_meta'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extensions ['ros']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description) by extension 'ros'
+[0.278s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_description' with type 'ros.ament_cmake' and name 'rover_description'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extensions ['ignore', 'ignore_ament_install']
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extension 'ignore'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extension 'ignore_ament_install'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extensions ['colcon_pkg']
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extension 'colcon_pkg'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extensions ['colcon_meta']
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extension 'colcon_meta'
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extensions ['ros']
+[0.278s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver) by extension 'ros'
+[0.280s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_driver' with type 'ros.ament_cmake' and name 'rover_driver'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extensions ['ignore', 'ignore_ament_install']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extension 'ignore'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extension 'ignore_ament_install'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extensions ['colcon_pkg']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extension 'colcon_pkg'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extensions ['colcon_meta']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extension 'colcon_meta'
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extensions ['ros']
+[0.280s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs) by extension 'ros'
+[0.281s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_msgs' with type 'ros.ament_cmake' and name 'rover_msgs'
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extensions ['ignore', 'ignore_ament_install']
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extension 'ignore'
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extension 'ignore_ament_install'
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extensions ['colcon_pkg']
+[0.281s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extension 'colcon_pkg'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extensions ['colcon_meta']
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extension 'colcon_meta'
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extensions ['ros']
+[0.282s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation) by extension 'ros'
+[0.283s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_navigation' with type 'ros.ament_cmake' and name 'rover_navigation'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extensions ['ignore', 'ignore_ament_install']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extension 'ignore'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extension 'ignore_ament_install'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extensions ['colcon_pkg']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extension 'colcon_pkg'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extensions ['colcon_meta']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extension 'colcon_meta'
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extensions ['ros']
+[0.283s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation) by extension 'ros'
+[0.284s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_simulation' with type 'ros.ament_cmake' and name 'rover_simulation'
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extensions ['ignore', 'ignore_ament_install']
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extension 'ignore'
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extension 'ignore_ament_install'
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extensions ['colcon_pkg']
+[0.284s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extension 'colcon_pkg'
+[0.285s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extensions ['colcon_meta']
+[0.285s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extension 'colcon_meta'
+[0.285s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extensions ['ros']
+[0.285s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop) by extension 'ros'
+[0.285s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/rover_teleop' with type 'ros.ament_cmake' and name 'rover_teleop'
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extensions ['ignore', 'ignore_ament_install']
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extension 'ignore'
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extension 'ignore_ament_install'
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extensions ['colcon_pkg']
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extension 'colcon_pkg'
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extensions ['colcon_meta']
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extension 'colcon_meta'
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extensions ['ros']
+[0.286s] Level 1:colcon.colcon_core.package_identification:_identify(/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2) by extension 'ros'
+[0.287s] DEBUG:colcon.colcon_core.package_identification:Package '/home/nick/development/waypoint_ws/src/roverrobotics_ros2/roverrobotics_ros2' with type 'ros.ament_cmake' and name 'roverrobotics_ros2'
+[0.287s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
